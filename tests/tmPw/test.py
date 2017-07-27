@@ -12,13 +12,20 @@ def run(interactive=False):
     if not os.path.exists(config["output"]):
         os.makedirs(config["output"])
 
+    with open(os.path.join(config["output"], "sigma"), "w") as f:
+        for k, v in config.items():
+            pair = "%s %s" % (k, str(v))
+            f.write(pair+"\n")
+            if interactive:
+                print(pair)
+
     points = [config["range"][0] + (config["range"][1] - config["range"][0])/config["points"]*i for i in range(config["points"])]
 
     ts=[0]
     with timing(ts=ts, interactive=interactive):
         res = list(map(lambda s: (s, tmPw.sigma({"s": s, "MP": tmPw.MP})), points))
-    with open(os.path.join(config["output"], "sigma"), "w") as f:
-        f.write("%f\n" % ts[0])
+    with open(os.path.join(config["output"], "sigma"), "a") as f:
+        f.write("Eval time: %f\n" % ts[0])
 
 
     if interactive:
