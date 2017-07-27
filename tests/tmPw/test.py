@@ -4,8 +4,8 @@ import sumrules.models.tmPw as tmPw
 import sumrules.models.basic as basic
 from utils import timing, updConf
 
-config = updConf({"range": (4*basic.m**2, 1000)
-         ,"points": 10000
+config = updConf({"range": (4*basic.m**2, 300)
+         ,"points": 1000
          ,"output": "output/tests/tmPw/"})
 
 def run(interactive=False):
