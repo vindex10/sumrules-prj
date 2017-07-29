@@ -1,11 +1,17 @@
 PPATH:=".."
 MKFILE_PATH:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 OUTPUT:=$(MKFILE_PATH)/output
+MODELS:=tmPw tmCoul
 
-.PHONY: all tmPw 
+.PHONY: all clean $(MODELS)
 
-all: tmPw
-tmPw:
-	PYTHONPATH=$(PPATH) OUTPUT=$(OUTPUT)/tmPw python tmPw/test.py
+all: $(MODELS)
+
+$(MODELS):
+	PYTHONPATH=$(PPATH) OUTPUT=$(OUTPUT)/$@ python $@/test.py
+	
+$(addprefix debug_,$(MODELS)):
+	PYTHONPATH=$(PPATH) OUTPUT=$(OUTPUT)/$(subst debug_,,$@) python -m ipdb $(subst debug_,,$@)/test.py
+
 clean:
 	rm -rf $(OUTPUT)
