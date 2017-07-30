@@ -30,8 +30,8 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 
 
 (* ::Input:: *)
-(*relerr = params["rel_err"];*)
-(*abserr = params["abs_err"];*)
+(*relerr = Floor[-Log10@params["rel_err"]];*)
+(*abserr = Floor[-Log10@params["abs_err"]];*)
 
 
 (* ::Input:: *)
@@ -42,38 +42,42 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 
 (* ::Input:: *)
 (*ClearAll["\[Beta]"];*)
-(*\[Beta] = Function[s, Sqrt[1 - (4 m^2)/s]];*)
+(*\[Beta][s_?NumericQ] := Sqrt[1 - (4 m^2)/s];*)
 
 
 (* ::Input:: *)
 (*ClearAll["\[Eta]"];*)
-(*\[Eta]=Function[k,(\[Mu] g)/k];*)
+(*\[Eta][k_?NumericQ]:=(\[Mu] g)/k;*)
 
 
 (* ::Input:: *)
 (*ClearAll["coAngle"];*)
-(*coAngle = Function[{Cpq,Cpr,Fqr},Cpq Cpr + Sqrt[1-Cpq^2] Sqrt[1-Cpr^2]Cos[Fqr]];*)
+(*coAngle[Cpq_?NumericQ,Cpr_?NumericQ,Fqr_?NumericQ]:=Cpq Cpr + Sqrt[1-Cpq^2] Sqrt[1-Cpr^2]Cos[Fqr];*)
 
 
 (* ::Input:: *)
 (*ClearAll["MP"];*)
-(*MP=Function[{q, p, Cqp},1/(p^2+q^2-2 p q Cqp +m^2)+1/(p^2+q^2+2 p q Cqp + m^2)];*)
+(*MP[q_?NumericQ, p_?NumericQ, Cqp_?NumericQ]:=1/(p^2+q^2-2 p q Cqp +m^2)+1/(p^2+q^2+2 p q Cqp + m^2);*)
 
 
 (* ::Input:: *)
 (*ClearAll["\[Psi]colP"];*)
-(*\[Psi]colP=Function[{k,p,Ckp},-4\[Pi] E^(-\[Pi] \[Eta][k]/2) Gamma[1+I \[Eta][k]]((2 (p^2-(k+I eps)^2)^(I \[Eta][k]) eps (-1 -I \[Eta][k]))/(p^2+k^2-2p k Ckp+eps^2)^(2+I \[Eta][k])+(2(k+I eps) \[Eta][k] (p^2-(k+I eps)^2)^(I \[Eta][k]-1))/(p^2+k^2-2p k Ckp+eps^2)^(1+I \[Eta][k]))];*)
+(*\[Psi]colP[k_?NumericQ,p_?NumericQ,Ckp_?NumericQ]:=-4\[Pi] E^(-\[Pi] \[Eta][k]/2) Gamma[1+I \[Eta][k]]((2 (p^2-(k+I eps)^2)^(I \[Eta][k]) eps (-1 -I \[Eta][k]))/(p^2+k^2-2p k Ckp+eps^2)^(2+I \[Eta][k])+(2(k+I eps) \[Eta][k] (p^2-(k+I eps)^2)^(I \[Eta][k]-1))/(p^2+k^2-2p k Ckp+eps^2)^(1+I \[Eta][k]));*)
 
 
 (* ::Input:: *)
 (*ClearAll["McolP"]*)
-(*McolP[p_, q_, Cpq_] := NIntegrate[px^2/(2\[Pi])^3 Sqrt[p^2+m^2]/Sqrt[px^2+m^2] Conjugate@\[Psi]colP[p, px, coAngle[Cqpx,Cpq,Fpx]] MP[px, q, Cqpx]*)
+(*McolP[p_?NumericQ, q_?NumericQ, Cpq_?NumericQ] := NIntegrate[px^2/(2\[Pi])^3 Sqrt[p^2+m^2]/Sqrt[px^2+m^2] Conjugate@\[Psi]colP[p, px, coAngle[Cqpx,Cpq,Fpx]] MP[px, q, Cqpx]*)
 (*		,{px, 0, INF}, {Cqpx, -1, 1}, {Fpx, 0, 2\[Pi]}]*)
 
 
 (* ::Input:: *)
 (*ClearAll["sigma"];*)
-(*sigma[s_]:=\[Beta][s]/(32 \[Pi] s) NIntegrate[Abs[MP[mom[s], mom[s,m], Cpq]]^2, {Cpq, -1,1}, PrecisionGoal->relerr, AccuracyGoal->abserr]*)
+(*sigma[s_?NumericQ]:=\[Beta][s]/(32 \[Pi] s) NIntegrate[Abs[McolP[mom[s], mom[s,m], Cpq]]^2, {Cpq, -1,1}, PrecisionGoal->relerr, AccuracyGoal->abserr]*)
+
+
+(* Freezes here, no sense to continue *)
+AbsoluteTiming@sigma[10]
 
 
 (* ::Input:: *)
@@ -93,4 +97,4 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 
 
 (* ::Input:: *)
-(*ListLinePlot[res[[2]], PlotRange->All]*)
+(*ListLinePlot[res[[2]], PlotRange->All, Mesh-> All]*)
