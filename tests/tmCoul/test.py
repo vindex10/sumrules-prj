@@ -1,12 +1,18 @@
 import os
 import matplotlib.pyplot as plt
-import sumrules.models.tmCoul as tmCoul
-import sumrules.models.basic as basic
-import sumrules.config
-from utils import timing, updConf, moduleVars
 
+from utils import timing, updConf, iwrite
+
+import sumrules
 sumrules.config = updConf(sumrules.config)
-config = updConf({"minS": 4*basic.m**2 + 1
+
+import sumrules.models
+sumrules.models.config = updConf(sumrules.models.config)
+m = sumrules.models.config["m"]
+
+import sumrules.models.tmCoul as model
+
+config = updConf({"minS": 4*m**2 + 1
          ,"maxS": 200
          ,"points": 10
          ,"output": "output/tests/tmCoul/"
@@ -18,53 +24,35 @@ def run(interactive=False):
 
     with open(os.path.join(config["output"], "params"), "w") as f:
         # model basic config
-        if interactive:
-            print("\n# model basic config")
-        f.write("# model basic config\n")
-        for k, v in moduleVars(basic).items():
-            pair = "%s %s" % (k, str(v))
-            f.write(pair+"\n")
-            if interactive:
-                print(pair)
+        iwrite(f, "# sumrules.models.config", interactive)
+        for k, v in sumrules.models.config.items():
+            iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # model config
-        if interactive:
-            print("\n# model config")
-        f.write("# model config\n")
+        iwrite(f, "# sumrules.config", interactive)
         for k, v in sumrules.config.items():
-            pair = "%s %s" % (k, str(v))
-            f.write(pair+"\n")
-            if interactive:
-                print(pair)
+            iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # test config
-        if interactive:
-            print("\n# test config")
-        f.write("# test config\n")
+        iwrite(f, "# config", interactive)
         for k, v in config.items():
-            pair = "%s %s" % (k, str(v))
-            f.write(pair+"\n")
-            if interactive:
-                print(pair)
+            iwrite(f, "%s %s" % (k, str(v)), interactive)
 
     points = [config["minS"] + (config["maxS"] - config["minS"])/config["points"]*i for i in range(config["points"])]
 
     ts=[0]
-    with timing(ts=ts, interactive=interactive):
-        res = list(map(lambda s: (s, tmCoul.sigma({"s": s, "MP": tmCoul.MP, "psiColP": tmCoul.psiColP})), points))
+    with timing(ts=ts):
+        res = list(map(lambda s: (s, model.sigma({"s": s, "MP": model.MP, "psiColP": model.psiColP})), points))
     with open(os.path.join(config["output"], "meta"), "w") as f:
-        f.write("evaltime %f\n" % ts[0])
-
-
-    if interactive:
-        print("s, sigma\n")
-        for pair in res[-10:]:
-            print("%e, %e\n" % pair)
+        iwrite(f, "evaltime %f" % ts[0], interactive)
 
     with open(os.path.join(config["output"], "sigma"), "a") as f:
-        f.write("s, sigma")
+        iwrite(f, "s, sigma", interactive)
         for pair in res:
             f.write("%e, %e\n" % pair)
+        if interactive:
+            for pair in res[-10:]:
+                print("%e, %e\n" % pair)
 
     plt.plot(*list(zip(*res)))
     plt.savefig(os.path.join(config["output"], "sigma_plot.png"))

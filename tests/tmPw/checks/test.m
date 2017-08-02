@@ -1,17 +1,46 @@
 (* ::Package:: *)
 
 (* ::Input:: *)
-(*m=1.27;*)
-(*g=-0.6;*)
-(*e1=0.303;*)
-(*eps=0.01;*)
-(*\[Mu]=m/2;*)
-(*INF=\[Infinity];*)
+(*(* load params *)*)
+
+
+(* ::Code:: *)
+(*path = "../../output/tmPw";*)
+(*SetDirectory[NotebookDirectory[]<>path]*)
+
+
+(* ::Code:: *)
+(*params = Module[{tmp},*)
+(*tmp = Import["params", "Lines"];*)
+(*tmp = Select[tmp, !StringMatchQ[#, StartOfString~~"# "~~___]&];*)
+(*tmp = StringSplit[#, " "]& /@tmp;*)
+(*tmp = {#[[1]], Quiet@Check[ToExpression[#[[2]]], #[[2]]] }&/@tmp;*)
+(*tmp = <|#[[1]]->#[[2]]&/@tmp|>*)
+(*];*)
+(*Column@KeyValueMap[Row[{#1," = ",#2}]&,params]*)
 
 
 (* ::Input:: *)
-(*RANGE={4 m^2, 300};*)
-(*POINTS=1000;*)
+(*m=params["m"];*)
+(*g=params["g"];*)
+(*e1=params["e1"];*)
+(*eps=params["eps"];*)
+(*\[Mu]=params["mu"];*)
+
+
+(* ::Input:: *)
+(*minS=params["minS"];*)
+(*maxS =params["maxS"];*)
+(*points=params["points"];*)
+
+
+(* ::Input:: *)
+(*relerr = Floor[-Log10@params["rel_err"]];*)
+(*abserr = Floor[-Log10@params["abs_err"]];*)
+
+
+(* ::Input:: *)
+(*(* define functions *)*)
 
 
 (* ::Input:: *)
@@ -46,15 +75,19 @@
 
 
 (* ::Input:: *)
-(*points = Table[RANGE[[1]]+(RANGE[[2]] - RANGE[[1]])/POINTS i, {i, 0, POINTS-1}];*)
+(*(* process *)*)
 
 
 (* ::Input:: *)
-(*res = AbsoluteTiming@Map[{#, sigma[#]}&, points];*)
+(*data = Table[minS+(maxS - minS)/points i, {i, 0, points-1}];*)
 
 
 (* ::Input:: *)
-(*Print["Eval time: ", res[[1]]]*)
+(*res = AbsoluteTiming@Map[{#, sigma[#]}&, data];*)
+
+
+(* ::Input:: *)
+(*Print["evaltime ", res[[1]]]*)
 
 
 (* ::Input:: *)
@@ -62,4 +95,4 @@
 
 
 (* ::Input:: *)
-(*ListLinePlot[res[[2]], PlotRange->All]*)
+(*ListLinePlot[res[[2]], PlotRange->All, Mesh->All]*)

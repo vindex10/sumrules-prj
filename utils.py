@@ -3,10 +3,8 @@ from timeit import default_timer as timer
 import os
 
 class timing:
-    def __init__(self, ts=[0], title="Eval time", interactive=True):
-        self.title = title
+    def __init__(self, ts=[0]):
         self.ts = ts
-        self.interactive = interactive
 
     def __enter__(self):
         self.timestop = timer()
@@ -14,11 +12,6 @@ class timing:
     
     def __exit__(self, type, value, traceback):
         self.ts[0] = timer() - self.timestop
-        if self.interactive:
-            out = str(self.ts[0])
-            if len(self.title) > 0:
-                out = self.title + ": " + out
-            print(out)
 
 def updConf(initConfig):
     config = initConfig.copy()
@@ -49,6 +42,7 @@ def parseStr(a):
     res = a if res is None else res
     return res
 
+# mark as deprecated
 def moduleVars(mod):
     return {k: v for k,v in mod.__dict__.items()
             if k in dir(mod)
@@ -56,3 +50,8 @@ def moduleVars(mod):
             and not k.startswith("_")
             and not callable(mod.__dict__[k])
             and not isinstance(mod.__dict__[k], ModuleType)}
+
+def iwrite(f, text, interactive=False):
+    f.write(text + "\n")
+    if interactive:
+        print(text)

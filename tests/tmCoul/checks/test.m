@@ -1,17 +1,23 @@
 (* ::Package:: *)
 
-path = "../../output/tmCoul";
-SetDirectory[NotebookDirectory[]<>path]
+(* ::Input:: *)
+(*(* load params *)*)
 
 
-params = Module[{tmp},
-tmp = Import["params", "Lines"];
-tmp = Select[tmp, !StringMatchQ[#, StartOfString~~"# "~~___]&];
-tmp = StringSplit[#, " "]& /@tmp;
-tmp = {#[[1]], Quiet@Check[ToExpression[#[[2]]], #[[2]]] }&/@tmp;
-tmp = <|#[[1]]->#[[2]]&/@tmp|>
-];
-Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
+(* ::Input:: *)
+(*path = "../../output/tmCoul";*)
+(*SetDirectory[NotebookDirectory[]<>path]*)
+
+
+(* ::Input:: *)
+(*params = Module[{tmp},*)
+(*tmp = Import["params", "Lines"];*)
+(*tmp = Select[tmp, !StringMatchQ[#, StartOfString~~"# "~~___]&];*)
+(*tmp = StringSplit[#, " "]& /@tmp;*)
+(*tmp = {#[[1]], Quiet@Check[ToExpression[#[[2]]], #[[2]]] }&/@tmp;*)
+(*tmp = <|#[[1]]->#[[2]]&/@tmp|>*)
+(*];*)
+(*Column@KeyValueMap[Row[{#1," = ",#2}]&,params]*)
 
 
 (* ::Input:: *)
@@ -19,8 +25,7 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 (*g=params["g"];*)
 (*e1=params["e1"];*)
 (*eps=params["eps"];*)
-(*\[Mu]=m/2;*)
-(*INF=params["INF"];*)
+(*\[Mu]=params["mu"];*)
 
 
 (* ::Input:: *)
@@ -32,6 +37,10 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 (* ::Input:: *)
 (*relerr = Floor[-Log10@params["rel_err"]];*)
 (*abserr = Floor[-Log10@params["abs_err"]];*)
+
+
+(* ::Input:: *)
+(*(* define functions *)*)
 
 
 (* ::Input:: *)
@@ -76,8 +85,13 @@ Column@KeyValueMap[Row[{#1," = ",#2}]&,params]
 (*sigma[s_?NumericQ]:=\[Beta][s]/(32 \[Pi] s) NIntegrate[Abs[McolP[mom[s], mom[s,m], Cpq]]^2, {Cpq, -1,1}, PrecisionGoal->relerr, AccuracyGoal->abserr]*)
 
 
-(* Freezes here, no sense to continue *)
-AbsoluteTiming@sigma[10]
+(* ::Input:: *)
+(*(* process *)*)
+
+
+(* ::Input:: *)
+(*(* Freezes here, no sense to continue *)*)
+(*AbsoluteTiming@sigma[10]*)
 
 
 (* ::Input:: *)
