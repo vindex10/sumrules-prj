@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 
 from utils import timing, updConf, iwrite
 
-import sumrules
-sumrules.config = updConf(sumrules.config)
+from sumrules.config import config as sconfig
+sconfig = updConf(sconfig)
 
-import sumrules.models
-sumrules.models.config = updConf(sumrules.models.config)
-m = sumrules.models.config["m"]
+from sumrules.models.basic import config as bconfig
+bconfig = updConf(bconfig)
+m = bconfig["m"]
 
 import sumrules.models.tmPw as model
 
@@ -25,12 +25,12 @@ def run(interactive=False):
     with open(os.path.join(config["output"], "params"), "a") as f:
         # model basic config
         iwrite(f, "# sumrules.models.config", interactive)
-        for k, v in sumrules.models.config.items():
+        for k, v in bconfig.items():
             iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # model config
         iwrite(f, "# sumrules.config", interactive)
-        for k, v in sumrules.config.items():
+        for k, v in sconfig.items():
             iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # test config

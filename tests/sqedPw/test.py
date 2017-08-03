@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from utils import timing, updConf, moduleVars, iwrite
 
 import sumrules.config
-sumrules.config = updConf(sumrules.config)
+sumrules.config.config = updConf(sumrules.config.config)
 
-import sumrules.models.basic as basic
-basic.config = updConf(basic.config)
-m = basic.config["m"]
-dimfactor = basic.config["dimfactor"]
+import sumrules.models.basic
+sumrules.models.basic.config = updConf(sumrules.models.basic.config)
+m = sumrules.models.basic.config["m"]
+dimfactor = sumrules.models.basic.config["dimfactor"]
 
 import sumrules.models.sqedPw as model
 
@@ -30,7 +30,7 @@ def pointwiseSigma(mp, points, label="", interactive=False):
     with timing(ts=ts):
         res = list(map(lambda s: (s, dimfactor*model.sigma({"s": s, "MP": mp})), points))
     with open(os.path.join(config["output"], "meta"), "a") as f:
-        iwrite(f, "%s::evaltime %f" % (label[1:], ts[0]), interactive)
+        iwrite(f, "%s::sigma_evaltime(%d) %f" % (label[1:], len(points), ts[0]), interactive)
 
 
 
@@ -60,7 +60,7 @@ def dosum(mp, label="", interactive=False):
         sr = model.sumrule({"minS": config["minS"], "maxS": config["maxS"], "MP": mp})
     
     with open(os.path.join(config["output"], "meta"), "a") as f:
-        iwrite(f, "%s::s_evaltime %f" % (label[1:], ts[0]), interactive)
+        iwrite(f, "%s::sumrule_evaltime %f" % (label[1:], ts[0]), interactive)
 
     with open(os.path.join(config["output"], "sumrule"), "a") as f:
         iwrite(f, "%s::sumrule %f" % (label[1:], sr), interactive)
@@ -73,13 +73,13 @@ def run(interactive=False):
 
     with open(os.path.join(config["output"], "params"), "a") as f:
         # model basic config
-        iwrite(f, "# sumrules.models.config", interactive)
-        for k, v in basic.config.items():
+        iwrite(f, "# sumrules.models.basic.config", interactive)
+        for k, v in sumrules.models.basic.config.items():
             iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # model config
-        iwrite(f, "# sumrules.config", interactive)
-        for k, v in sumrules.config.items():
+        iwrite(f, "# sumrules.config.config", interactive)
+        for k, v in sumrules.config.config.items():
             iwrite(f, "%s %s" % (k, str(v)), interactive)
 
         # test config

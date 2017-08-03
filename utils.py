@@ -33,7 +33,14 @@ def parseStr(a):
         return res
 
     try:
-        res = int(a) if float(int(a)) == float(a) else float(a)
+        res = int(a)
+        return res
+    except ValueError:
+        res = None
+        pass
+
+    try:
+        res = float(a)
         return res
     except ValueError:
         res = None
