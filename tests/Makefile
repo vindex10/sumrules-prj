@@ -1,6 +1,6 @@
 PPATH:=".."
 MKFILE_PATH:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-OUTPUT:=$(MKFILE_PATH)/output
+OUTPUT?=$(MKFILE_PATH)/output
 MODELS:=tmPw tmCoul sqedPw sqedCoul
 
 .PHONY: all clean $(MODELS) $(addprefix clean_,$(MODELS)) $(addprefix debug_,$(MODELS))
