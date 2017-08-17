@@ -27,6 +27,19 @@ cd sumrules-prj
 pip install -r requirements.txt
 ```
 
+The only thing with requirements, not all of them can be installed with pip. Look requiremnts-third.txt for such ones.
+
+
+Installing cubature (you will need gcc to compile cubature, in ubuntu-like distros you have to install also build-essentials, python-dev):
+```bash
+pip install cython
+git clone https://github.com/saullocastro/cubature.git
+cd cubature
+python setup.py install
+cd ..
+rm -rf cubature # cubature installed to your virtual env, so you don't need sources
+```
+
 Running tests:
 ---------------
 
