@@ -5,6 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 cycler==0.10.0            # via matplotlib
+functools32==3.2.3.post2  # via matplotlib
 future==0.16.0
 matplotlib==2.0.2
 numpy==1.13.1             # via matplotlib, scipy
@@ -13,3 +14,4 @@ python-dateutil==2.6.1    # via matplotlib
 pytz==2017.2              # via matplotlib
 scipy==0.19.1
 six==1.10.0               # via cycler, matplotlib, python-dateutil
+subprocess32==3.2.7       # via matplotlib
