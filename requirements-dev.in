@@ -1,3 +1,4 @@
 -r requirements.in
 jedi
 ipython
+ipdb
