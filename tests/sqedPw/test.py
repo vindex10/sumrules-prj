@@ -47,8 +47,6 @@ def pointwiseSigma(mp, points, label="", interactive=False):
     plt.savefig(os.path.join(config["output"], "sigma_plot"+label+".png"))
 
     if interactive:
-        plt.show()
-        plt.clf()
         print("end pointwiseSigma: " + label[1:])
 
 def dosum(mp, label="", interactive=False):
@@ -64,7 +62,6 @@ def dosum(mp, label="", interactive=False):
 
     with open(os.path.join(config["output"], "sumrule"), "a") as f:
         iwrite(f, "%s::sumrule %f" % (label[1:], sr), interactive)
-        iwrite(f, "%s::dim_sumrule %f" % (label[1:], sr*dimfactor), interactive)
     return sr
 
 def run(interactive=False):

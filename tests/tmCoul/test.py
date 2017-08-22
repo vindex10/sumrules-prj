@@ -57,8 +57,5 @@ def run(interactive=False):
     plt.plot(*list(zip(*res)))
     plt.savefig(os.path.join(config["output"], "sigma_plot.png"))
 
-    if interactive:
-        plt.show()
-
 if __name__ == "__main__":
     run(interactive=config["interactive"])
