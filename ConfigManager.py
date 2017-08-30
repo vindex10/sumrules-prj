@@ -79,30 +79,21 @@ class ConfigManager:
         return (prefix, entry[len(prefix)+1:])
 
     def _parseStr(self, a):
-        res = None
-
         if a == "True":
-            res = True
-            return res
+            return True
 
         if a == "False":
-            res = False
-            return res
+            return False
 
         try:
-            res = int(a)
-            return res
+            return int(a)
         except ValueError:
-            res = None
             pass
 
         try:
-            res = float(a)
-            return res
+            return float(a)
         except ValueError:
-            res = None
             pass
 
-        res = a if res is None else res
-        return res
+        return a
 
