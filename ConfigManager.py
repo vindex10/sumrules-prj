@@ -33,7 +33,7 @@ class ConfigManager:
     def readFile(self, filename, prefix=None):
         if prefix is None:
             for pref in self.watching.keys():
-                self.readEnv(prefix=pref)
+                self.readFile(filename, prefix=pref)
             return
 
         try:
@@ -41,9 +41,12 @@ class ConfigManager:
                 patt = re.compile("([^=\s]+)\s*=\s*(?:\"(.+)\"|'(.+)'|([^\s]+))")
                 updict = dict()
                 for line in f:
+                    matching = patt.match(line)
+                    if not matching:
+                        continue
                     pair = [v for v in patt.match(line).groups() if v is not None]
                     if len(pair) > 0:
-                        parsed = self._entryToPair()
+                        parsed = self._entryToPair(pair[0])
                         if parsed and parsed[0] == prefix:
                             updict.update({parsed[1]: self._parseStr(pair[1])})
             self.watching[prefix].params(updict)
