@@ -13,7 +13,8 @@
 (*params = Module[{tmp},*)
 (*tmp = Import["params", "Lines"];*)
 (*tmp = Select[tmp, !StringMatchQ[#, StartOfString~~"# "~~___]&];*)
-(*tmp = StringSplit[#, " "]& /@tmp;*)
+(*tmp = StringSplit[#, "="]& /@tmp;*)
+(*tmp = StringReplace[#, {"e+" :> "*^", "e-" :> "*^-"}]& /@ tmp;*)
 (*tmp = {#[[1]], Quiet@Check[ToExpression[#[[2]]], #[[2]]] }&/@tmp;*)
 (*tmp = <|#[[1]]->#[[2]]&/@tmp|>*)
 (*];*)
@@ -21,22 +22,23 @@
 
 
 (* ::Input:: *)
-(*m=params["m"];*)
-(*g=params["g"];*)
-(*e1=params["e1"];*)
-(*eps=params["eps"];*)
-(*\[Mu]=params["mu"];*)
+(*m=params["G_m"];*)
+(*g=params["G_g"];*)
+(*e1=params["G_e1"];*)
+(*eps=params["G_eps"];*)
+(*\[Mu]=params["G_mu"];*)
+(*dimfactor = params["G_dimfactor"];*)
 
 
 (* ::Input:: *)
-(*minS=params["minS"];*)
-(*maxS =params["maxS"];*)
-(*points=params["points"];*)
+(*minS=params["TEST_minS"];*)
+(*maxS =params["TEST_maxS"];*)
+(*points=params["TEST_points"];*)
 
 
 (* ::Input:: *)
-(*relerr = Floor[-Log10@params["rel_err"]];*)
-(*abserr = Floor[-Log10@params["abs_err"]];*)
+(*sigmaRelErr = Floor[-Log10@params["SIGMA_relErr"]];*)
+(*sigmaAbsErr = Floor[-Log10@params["SIGMA_absErr"]];*)
 
 
 (* ::Input:: *)
@@ -66,12 +68,13 @@
 
 (* ::Input:: *)
 (*ClearAll["MP"];*)
-(*MP=Function[{q, p, Cqp},1/(p^2+q^2-2 p q Cqp +m^2)+1/(p^2+q^2+2 p q Cqp + m^2)];*)
+(*MP=Function[{q, p, Cqp, phi},1/(p^2+q^2-2 p q Cqp +m^2)+1/(p^2+q^2+2 p q Cqp + m^2)];*)
 
 
 (* ::Input:: *)
 (*ClearAll["sigma"];*)
-(*sigma[s_]:=\[Beta][s]/(32 \[Pi] s) NIntegrate[Abs[MP[mom[s], mom[s,m], Cpq]]^2, {Cpq, -1,1}, PrecisionGoal->Infinity,AccuracyGoal->4]*)
+(*sigma[s_]:= NIntegrate[dimfactor \[Beta][s]/(64 \[Pi]^2 s) Abs[MP[mom[s], mom[s,m], Cpq, phi]]^2, *)
+(*{Cpq, -1,1}, {phi, 0, 2\[Pi]}, PrecisionGoal->sigmaRelErr,AccuracyGoal->sigmaAbsErr]*)
 
 
 (* ::Input:: *)

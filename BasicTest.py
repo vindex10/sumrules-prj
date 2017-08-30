@@ -4,14 +4,17 @@ from sys import argv
 from ConfigManager import ConfigManager
 
 class BasicTest(object):
-    def __init__(self, model):
-        self.title = model
-        self.configPath = model+".conf"
-        self.model = __import__("sumrules.models."+model, globals(), locals(), ["*"])
+    def __init__(self, title="unnamed"):
+        self.title = title
+        self.configPath = title+".conf"
         self.config = ConfigManager()
         self.config.register(self, "TEST")
         self.interactive = False
-        self.outputPath = "output/%s" % model
+        self.outputPath = "output/%s" % title
+        self._keylist = ["title"
+                        ,"interactive"
+                        ,"outputPath"
+                        ,"configPath"]
         self.parseCmd()
 
     def parseCmd(self):
@@ -25,16 +28,11 @@ class BasicTest(object):
         return True
 
     def params(self, paramdict=None):
-        keylist = ("title"
-                  ,"interactive"
-                  ,"outputPath"
-                  ,"configPath")
-
         if paramdict is None:
-            return {k: getattr(self, k) for k in keylist}
+            return {k: getattr(self, k) for k in self._keylist}
 
         for key, val in paramdict.items():
-            if key in keylist:
+            if key in self._keylist:
                 setattr(self, key, val)
         return True
 

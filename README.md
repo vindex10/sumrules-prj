@@ -82,8 +82,8 @@ OUTPUT="somedir/anotherdir/" make sqedPw # place output files to tests/somedir/a
 
 To see all parameters, firstly run test, then check file "params" in output.
 
-Refactor plans:
+Notes:
 ---------------
 
-* Interactive printing must occur automatically when writing to file occurs (partially implemented with _iwrite_ function)
-* Organize multithreading in the right way. Provide an ability to broadcast on the lowest level and multiprocess on the highest one.
+* SigmaEvaluator. Should it integrate over phi?
+* Something is wrong with check.nb for sqedPw. Analytical solution has wrong prefactor.

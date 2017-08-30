@@ -7,47 +7,47 @@ import matplotlib.pyplot as plt
 from utils import timing
 
 import sumrules
-import sumrules.models
-from tests.BasicTest import BasicTest
+from sumrules.analytics import psiColP\
+                             , sqedMP0 as MP0\
+                             , sqedMP2 as MP2
+from sumrules.evaluators import SumruleEvaluator\
+                              , SigmaEvaluator\
+                              , McolPEvaluator
+from sumrules.parallel import npMap, mpMap
+from BasicTest import BasicTest
 
 class Test(BasicTest):
     def __init__(self):
         super(self.__class__, self).__init__("sqedCoul")
-        self.SumruleEvaluatorInstance = self.model.SumruleEvaluator()
-        self.SigmaEvaluatorInstance = self.model.SigmaEvaluator()
+
+        self.McolPEvaluatorInstance\
+                = McolPEvaluator(None, psiColP)
+        self.McolPEvaluatorInstance.vectorized = True
+        self.McolPEvaluatorInstance.mapper = npMap
+
+        self.SigmaEvaluatorInstance\
+                = SigmaEvaluator(self.McolPEvaluatorInstance)
+
         self.SumruleEvaluatorInstance\
-            .SigmaEvaluatorInstance = self.SigmaEvaluatorInstance
+                = SumruleEvaluator(self.SigmaEvaluatorInstance)
+        self.SumruleEvaluatorInstance.vectorized = True
+        self.SumruleEvaluatorInstance.mapper = mpMap
 
         self.config.register(sumrules.config, "TECH")
-        self.config.register(sumrules.models.config, "G")
+        self.config.register(sumrules.constants, "G")
         self.config.register(self.SumruleEvaluatorInstance, "SUMRULE")
         self.config.register(self.SigmaEvaluatorInstance, "SIGMA")
-        self.config.register(self.SigmaEvaluatorInstance\
-                                 .McolPEvaluatorInstance, "MCOLP")
+        self.config.register(self.McolPEvaluatorInstance, "MP")
 
         self.points = 20
+        self.skipPointwise = False
+        self._keylist += ["points", "skipPointwise"]
 
         self.config.readEnv()
         self.config.readFile(self.configPath)
 
         if not os.path.exists(self.config["TEST_outputPath"]):
             os.makedirs(self.config["TEST_outputPath"])
-
-    def params(self, paramdict=None):
-        sup = super(self.__class__, self).params(paramdict)
-
-        keylist = ("points", )
-        
-        if paramdict is None:
-            # list here params of current test
-            sup.update({k: getattr(self, k) for k in keylist})
-            return sup
-        
-        # check if some values of paramdict correspond to current test properties
-        for key, val in paramdict.items():
-            if key in keylist:
-                setattr(self, key, val)
-        return True
 
     def pointwiseSigma(self, mp, points):
         "Test sigma value per point"
@@ -56,9 +56,7 @@ class Test(BasicTest):
         dimfactor = self.config["G_dimfactor"]
         outputPath = self.config["TEST_outputPath"]
 
-        self.SumruleEvaluatorInstance\
-            .SigmaEvaluatorInstance\
-            .McolPEvaluatorInstance.MP = mp
+        self.McolPEvaluatorInstance.MP = mp
 
         label = mp.__name__
 
@@ -82,9 +80,7 @@ class Test(BasicTest):
         dimfactor = self.config["G_dimfactor"]
         outputPath = self.config["TEST_outputPath"]
 
-        self.SumruleEvaluatorInstance\
-            .SigmaEvaluatorInstance\
-            .McolPEvaluatorInstance.MP = mp
+        self.McolPEvaluatorInstance.MP = mp
 
         label = mp.__name__
 
@@ -105,13 +101,15 @@ class Test(BasicTest):
         points = self.config["TEST_points"]
         outputPath = self.config["TEST_outputPath"]
 
-        thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
 
-        self.pointwiseSigma(self.model.MP0, thepoints)
-        self.pointwiseSigma(self.model.MP2, thepoints)
+        if not self.skipPointwise:
+            thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
 
-        s0 = self.dosum(self.model.MP0)
-        s2 = self.dosum(self.model.MP2)
+            self.pointwiseSigma(MP0, thepoints)
+            self.pointwiseSigma(MP2, thepoints)
+
+        s0 = self.dosum(MP0)
+        s2 = self.dosum(MP2)
 
         with open(os.path.join(outputPath, "sumrule"), "a") as f:
             self.iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1))
