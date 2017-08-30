@@ -2,97 +2,119 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from builtins import * # quite boldly but simply enough
 
 import os
+
 import matplotlib.pyplot as plt
+from utils import timing
 
-from utils import timing, updConf, iwrite
+import sumrules
+from sumrules.analytics import psiColP\
+                             , sqedMP0 as MP0\
+                             , sqedMP2 as MP2
+from sumrules.evaluators import SumruleEvaluator\
+                              , SigmaEvaluator\
+                              , McolPEvaluator
+from sumrules.parallel import npMap, mpMap
+from BasicTest import BasicTest
 
-import sumrules.config
-sumrules.config.config = updConf(sumrules.config.config)
+class Test(BasicTest):
+    def __init__(self):
+        super(self.__class__, self).__init__("sqedCoul")
 
-import sumrules.models.basic
-sumrules.models.basic.config = updConf(sumrules.models.basic.config)
-m = sumrules.models.basic.config["m"]
-dimfactor = sumrules.models.basic.config["dimfactor"]
+        self.McolPEvaluatorInstance\
+                = McolPEvaluator(None, psiColP)
+        self.McolPEvaluatorInstance.vectorized = True
+        self.McolPEvaluatorInstance.mapper = npMap
 
-import sumrules.models.sqedCoul as model
+        self.SigmaEvaluatorInstance\
+                = SigmaEvaluator(self.McolPEvaluatorInstance)
 
-config = updConf({"minS": 4*m**2+0.001
-         ,"maxS": 200
-         ,"points": 1
-         ,"output": "output/tests/sqedCoul/"
-         ,"interactive": False})
+        self.SumruleEvaluatorInstance\
+                = SumruleEvaluator(self.SigmaEvaluatorInstance)
+        self.SumruleEvaluatorInstance.vectorized = True
+        self.SumruleEvaluatorInstance.mapper = mpMap
 
-def pointwiseSigma(mp, points, label="", interactive=False):
-    "Test sigma value per point"
-    label = "_"+label
+        self.config.register(sumrules.config, "TECH")
+        self.config.register(sumrules.constants, "G")
+        self.config.register(self.SumruleEvaluatorInstance, "SUMRULE")
+        self.config.register(self.SigmaEvaluatorInstance, "SIGMA")
+        self.config.register(self.McolPEvaluatorInstance, "MP")
 
-    if interactive:
-        print("start pointwiseSigma: " + label[1:])
+        self.points = 20
+        self.skipPointwise = False
+        self._keylist += ["points", "skipPointwise"]
 
-    ts=[0]
-    with timing(ts=ts):
-        res = list(map(lambda s: (s, dimfactor*model.sigma({"s": s, "MP": mp, "psiColP": model.psiColP})), points))
-    with open(os.path.join(config["output"], "meta"), "a") as f:
-        iwrite(f, "%s::sigma_evaltime(%d) %f" % (label[1:], len(points), ts[0]), interactive)
+        self.config.readEnv()
+        self.config.readFile(self.configPath)
 
-    with open(os.path.join(config["output"], "sigma"), "a") as f:
-        iwrite(f, "# %s" % label[1:], interactive)
-        iwrite(f, "s, sigma", interactive)
-        for pair in res:
-            iwrite(f, "%e, %e" % pair, interactive)
+        if not os.path.exists(self.config["TEST_outputPath"]):
+            os.makedirs(self.config["TEST_outputPath"])
 
-    plt.plot(*list(zip(*res)))
-    plt.savefig(os.path.join(config["output"], "sigma_plot"+label+".png"))
+    def pointwiseSigma(self, mp, points):
+        "Test sigma value per point"
 
-    if interactive:
-        print("end pointwiseSigma: " + label[1:])
+        m = self.config["G_m"]
+        dimfactor = self.config["G_dimfactor"]
+        outputPath = self.config["TEST_outputPath"]
 
-def dosum(mp, label="", interactive=False):
-    "evaluate sumrule for specific MP"
-    label = "_" + label
+        self.McolPEvaluatorInstance.MP = mp
 
-    ts=[0]
-    with timing(ts=ts):
-        sr = model.sumrule({"minS": config["minS"], "maxS": config["maxS"], "MP": mp, "psiColP": model.psiColP})
-    
-    with open(os.path.join(config["output"], "meta"), "a") as f:
-        iwrite(f, "%s::sumrule_evaltime %f" % (label[1:], ts[0]), interactive)
+        label = mp.__name__
 
-    with open(os.path.join(config["output"], "sumrule"), "a") as f:
-        iwrite(f, "%s::sumrule %f" % (label[1:], sr), interactive)
-    return sr
+        with timing() as t:
+            res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
+            with open(os.path.join(outputPath, "meta"), "a") as f:
+                self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
 
-def run(interactive=False):
-    if not os.path.exists(config["output"]):
-        os.makedirs(config["output"])
+        with open(os.path.join(outputPath, "sigma"), "a") as f:
+            self.iwrite(f, "# %s" % label)
+            self.iwrite(f, "s, sigma")
+            for pair in res:
+                self.iwrite(f, "%e, %e" % pair)
 
-    with open(os.path.join(config["output"], "params"), "a") as f:
-        # model basic config
-        iwrite(f, "# sumrules.models.basic.config", interactive)
-        for k, v in sumrules.models.basic.config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+        plt.plot(*list(zip(*res)))
+        plt.savefig(os.path.join(outputPath, "sigma_plot."+label+".png"))
 
-        # model config
-        iwrite(f, "# sumrules.config.config", interactive)
-        for k, v in sumrules.config.config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+    def dosum(self, mp):
+        "evaluate sumrule for specific MP"
+        m = self.config["G_m"]
+        dimfactor = self.config["G_dimfactor"]
+        outputPath = self.config["TEST_outputPath"]
 
-        # test config
-        iwrite(f, "# config", interactive)
-        for k, v in config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+        self.McolPEvaluatorInstance.MP = mp
 
-    points = [config["minS"] + (config["maxS"] - config["minS"])/config["points"]*i for i in range(config["points"])]
+        label = mp.__name__
 
-    pointwiseSigma(model.MP0, points, "MP0", interactive)
-    pointwiseSigma(model.MP2, points, "MP2", interactive)
+        with timing() as t:
+            sr = self.SumruleEvaluatorInstance.compute()
+            with open(os.path.join(outputPath, "meta"), "a") as f:
+                self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
 
-    s0 = dosum(model.MP0, "MP0", interactive)
-    s2 = dosum(model.MP2, "MP2", interactive)
+        with open(os.path.join(outputPath, "sumrule"), "a") as f:
+            self.iwrite(f, "%s::sumrule %f" % (label, sr))
+        return sr
+
+    def run(self):
+        super(self.__class__, self).run()
+
+        minS = self.config["SUMRULE_minS"]
+        maxS = self.config["SUMRULE_maxS"]
+        points = self.config["TEST_points"]
+        outputPath = self.config["TEST_outputPath"]
 
 
-    with open(os.path.join(config["output"], "sumrule"), "a") as f:
-        iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1), interactive)
+        if not self.skipPointwise:
+            thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
+
+            self.pointwiseSigma(MP0, thepoints)
+            self.pointwiseSigma(MP2, thepoints)
+
+        s0 = self.dosum(MP0)
+        s2 = self.dosum(MP2)
+
+        with open(os.path.join(outputPath, "sumrule"), "a") as f:
+            self.iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1))
+
 
 if __name__ == "__main__":
-    run(interactive=config["interactive"])
+    instance = Test()
+    instance.run()

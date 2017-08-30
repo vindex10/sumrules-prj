@@ -1,67 +1,77 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import * # quite boldly but simply enough
+from builtins import *
 
 import os
+
 import matplotlib.pyplot as plt
+from utils import timing
 
-from utils import timing, updConf, iwrite
+import sumrules
+from sumrules.analytics import tmMP as MP
+from sumrules.evaluators import SigmaEvaluator\
+                              , TrivialEvaluator
+from sumrules.parallel import npMap, mpMap
+from BasicTest import BasicTest
 
-import sumrules.config
-sumrules.config.config = updConf(sumrules.config.config)
+class Test(BasicTest):
+    def __init__(self):
+        super(self.__class__, self).__init__("tmPw")
 
-import sumrules.models.basic
-sumrules.models.basic.config = updConf(sumrules.models.basic.config)
-m = sumrules.models.basic.config["m"]
+        self.MPEvaluatorInstance = TrivialEvaluator(MP)
+        self.SigmaEvaluatorInstance\
+                = SigmaEvaluator(self.MPEvaluatorInstance)
+        self.SigmaEvaluatorInstance.vectorized = True
+        self.SigmaEvaluatorInstance.mapper = npMap
 
-import sumrules.models.tmPw as model
+        self.config.register(sumrules.config, "TECH")
+        self.config.register(sumrules.constants, "G")
+        self.config.register(self.SigmaEvaluatorInstance, "SIGMA")
 
-config = updConf({"minS": 4*m**2
-         ,"maxS": 300
-         ,"points": 1000
-         ,"output": "output/tests/tmPw/"
-         ,"interactive": False})
+        self.points = 20
+        self.minS = 4*self.config["G_m"]**2
+        self.maxS = 1000
+        self._keylist += ["points", "minS", "maxS"]
 
-def run(interactive=False):
-    if not os.path.exists(config["output"]):
-        os.makedirs(config["output"])
+        self.config.readEnv()
+        self.config.readFile(self.configPath)
 
-    with open(os.path.join(config["output"], "params"), "a") as f:
-        # model basic config
-        iwrite(f, "# sumrules.models.basic.config", interactive)
-        for k, v in sumrules.models.basic.config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+        if not os.path.exists(self.config["TEST_outputPath"]):
+            os.makedirs(self.config["TEST_outputPath"])
 
-        # model config
-        iwrite(f, "# sumrules.config.config", interactive)
-        for k, v in sumrules.config.config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+    def pointwiseSigma(self, points):
+        "Test sigma value per point"
 
-        # test config
-        iwrite(f, "# config", interactive)
-        for k, v in config.items():
-            iwrite(f, "%s %s" % (k, str(v)), interactive)
+        m = self.config["G_m"]
+        dimfactor = self.config["G_dimfactor"]
+        outputPath = self.config["TEST_outputPath"]
 
-    points = [config["minS"] + (config["maxS"] - config["minS"])/config["points"]*i for i in range(config["points"])]
+        label = "MP"
 
-    ts=[0]
-    with timing(ts=ts):
-        res = list(map(lambda s: (s, model.sigma({"s": s, "MP": model.MP})), points))
-    with open(os.path.join(config["output"], "meta"), "a") as f:
-        iwrite(f, "evaltime %f" % ts[0], interactive)
+        with timing() as t:
+            res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
+            with open(os.path.join(outputPath, "meta"), "a") as f:
+                self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
 
-    if interactive:
-        print(res[-10:])
+        with open(os.path.join(outputPath, "sigma"), "a") as f:
+            self.iwrite(f, "# %s" % label)
+            self.iwrite(f, "s, sigma")
+            for pair in res:
+                self.iwrite(f, "%e, %e" % pair)
 
-    with open(os.path.join(config["output"], "sigma"), "a") as f:
-        iwrite(f, "s, sigma", interactive)
-        for pair in res:
-            f.write("%e, %e\n" % pair)
-        if interactive:
-            for pair in res[-10:]:
-                print("%e, %e\n" % pair)
+        plt.plot(*list(zip(*res)))
+        plt.savefig(os.path.join(outputPath, "sigma_plot."+label+".png"))
 
-    plt.plot(*list(zip(*res)))
-    plt.savefig(os.path.join(config["output"], "sigma_plot.png"))
+    def run(self):
+        super(self.__class__, self).run()
+
+        points = self.config["TEST_points"]
+        minS = self.config["TEST_minS"]
+        maxS = self.config["TEST_maxS"]
+        outputPath = self.config["TEST_outputPath"]
+
+        thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
+        self.pointwiseSigma(thepoints)
 
 if __name__ == "__main__":
-    run(interactive=config["interactive"])
+    instance = Test()
+    instance.run()
