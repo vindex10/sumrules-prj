@@ -84,6 +84,4 @@ To see all parameters, firstly run test, then check file "params" in output.
 
 Notes:
 ---------------
-
-* SigmaEvaluator. Should it integrate over phi?
-* Something is wrong with check.nb for sqedPw. Analytical solution has wrong prefactor.
+Nothing for now

@@ -24,9 +24,10 @@
 (* ::Input:: *)
 (*m=params["G_m"];*)
 (*g=params["G_g"];*)
-(*e1=params["G_e1"];*)
+(*e=params["G_e"];*)
 (*eps=params["G_eps"];*)
 (*\[Mu]=params["G_mu"];*)
+(*Nc=params["G_Nc"];*)
 (*dimfactor = params["G_dimfactor"];*)
 
 
@@ -70,22 +71,22 @@
 
 (* ::Input:: *)
 (*ClearAll[MP0]*)
-(*MP0[p_,q_,Cpq_,\[Phi]_]:=2I e1^2(1-p^2(1-Cpq^2)(1/(q^2+p^2-2q p Cpq+m^2)+1/(q^2+p^2+2q p Cpq+m^2))); *)
+(*MP0[p_,q_,Cpq_,\[Phi]_]:=2I e^2(1-p^2(1-Cpq^2)(1/(q^2+p^2-2q p Cpq+m^2)+1/(q^2+p^2+2q p Cpq+m^2))); *)
 (*ClearAll[MP2]*)
-(*MP2[p_,q_,Cpq_,\[Phi]_]:=2I e1^2p^2(1-Cpq^2)(1/(q^2+p^2-2q p Cpq+m^2)+1/(q^2+p^2+2q p Cpq+m^2))E^(2I \[Phi]); *)
+(*MP2[p_,q_,Cpq_,\[Phi]_]:=2I e^2p^2(1-Cpq^2)(1/(q^2+p^2-2q p Cpq+m^2)+1/(q^2+p^2+2q p Cpq+m^2))E^(2I \[Phi]); *)
 (**)
 
 
 (* ::Input:: *)
 (*ClearAll[sigma0];*)
-(*sigma0[s_?NumericQ]:=dimfactor \[Beta][s]/(64 \[Pi]^2 s) NIntegrate[Abs[MP0[mom[s, m], mom[s], Cpq, phi]]^2, {Cpq, -1,1},{phi, 0, 2\[Pi]}, PrecisionGoal->sigmaRelErr, AccuracyGoal->sigmaAbsErr];*)
+(*sigma0[s_?NumericQ]:=dimfactor \[Beta][s]/(64 \[Pi]^2 s) Nc NIntegrate[Abs[MP0[mom[s, m], mom[s], Cpq, phi]]^2, {Cpq, -1,1},{phi, 0, 2\[Pi]}, PrecisionGoal->sigmaRelErr, AccuracyGoal->sigmaAbsErr];*)
 (*ClearAll[sigma2];*)
-(*sigma2[s_?NumericQ]:=dimfactor \[Beta][s]/(64 \[Pi]^2 s) NIntegrate[Abs[MP2[mom[s, m], mom[s], Cpq, phi]]^2, {Cpq, -1,1}, {phi, 0, 2\[Pi]},PrecisionGoal->sigmaRelErr, AccuracyGoal->sigmaAbsErr];*)
+(*sigma2[s_?NumericQ]:=dimfactor \[Beta][s]/(64 \[Pi]^2 s) Nc NIntegrate[Abs[MP2[mom[s, m], mom[s], Cpq, phi]]^2, {Cpq, -1,1}, {phi, 0, 2\[Pi]},PrecisionGoal->sigmaRelErr, AccuracyGoal->sigmaAbsErr];*)
 
 
 (* ::Input:: *)
-(*\[Sigma]0[s_]:=dimfactor 3 (e1^2/Sqrt[3])^2 (e1^2/(4\[Pi]))^2 8 \[Pi]/s (m^2/s \[Beta][s]+4 m^4/s^2 Log[Sqrt[s]/(2 m) (1+\[Beta][s])])*)
-(*\[Sigma]2[s_]:=dimfactor 3 (e1^2/Sqrt[3])^2 (e1^2/(4\[Pi]))^2 4 \[Pi]/s ((2 m^2 + s )/s \[Beta][s]+ (8 m^2 (m^2-s))/s^2 Log[Sqrt[s]/(2 m) (1+\[Beta][s])])*)
+(*\[Sigma]0[s_]:=dimfactor Nc (e^2/(4 \[Pi]))^2 8 \[Pi]/s (m^2/s \[Beta][s]+4 m^4/s^2 Log[Sqrt[s]/(2 m) (1+\[Beta][s])])*)
+(*\[Sigma]2[s_]:=dimfactor Nc (e^2/(4 \[Pi]))^2 4 \[Pi]/s ((2 m^2 + s )/s \[Beta][s]+ (8 m^2 (m^2-s))/s^2 Log[Sqrt[s]/(2 m) (1+\[Beta][s])])*)
 
 
 (* ::Code:: *)
