@@ -26,7 +26,6 @@
 (*g=params["G_g"];*)
 (*e1=params["G_e1"];*)
 (*eps=params["G_eps"];*)
-(*\[Mu]=params["G_mu"];*)
 (*dimfactor = params["G_dimfactor"];*)
 
 
@@ -58,7 +57,7 @@
 
 (* ::Input:: *)
 (*ClearAll["\[Eta]"];*)
-(*\[Eta]=Function[k,(\[Mu] g)/k];*)
+(*\[Eta]=Function[k,(m g)/2/k];*)
 
 
 (* ::Input:: *)
