@@ -11,7 +11,7 @@ from sumrules.analytics import tmMP as MP
 from sumrules.evaluators import SigmaEvaluator\
                               , TrivialEvaluator
 from sumrules.parallel import npMap, mpMap
-from BasicTest import BasicTest
+from sumrules.tools import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
@@ -49,17 +49,17 @@ class Test(BasicTest):
 
         with timing() as t:
             res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
-            with open(os.path.join(outputPath, "meta"), "a") as f:
+            with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
 
-        with open(os.path.join(outputPath, "sigma"), "a") as f:
+        with open(self.path("sigma"), "a") as f:
             self.iwrite(f, "# %s" % label)
             self.iwrite(f, "s, sigma")
             for pair in res:
                 self.iwrite(f, "%e, %e" % pair)
 
         plt.plot(*list(zip(*res)))
-        plt.savefig(os.path.join(outputPath, "sigma_plot."+label+".png"))
+        plt.savefig(self.path("sigma_plot."+label+".png"))
 
     def run(self):
         super(self.__class__, self).run()

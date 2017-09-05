@@ -14,7 +14,7 @@ from sumrules.evaluators import SumruleEvaluator\
                               , SigmaEvaluator\
                               , McolPEvaluator
 from sumrules.parallel import npMap, mpMap
-from BasicTest import BasicTest
+from sumrules.tools import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
@@ -63,34 +63,40 @@ class Test(BasicTest):
 
         with timing() as t:
             res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
-            with open(os.path.join(outputPath, "meta"), "a") as f:
+            with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
 
-        with open(os.path.join(outputPath, "sigma"), "a") as f:
+        with open(self.path("sigma"), "a") as f:
             self.iwrite(f, "# %s" % label)
             self.iwrite(f, "s, sigma")
             for pair in res:
                 self.iwrite(f, "%e, %e" % pair)
 
         plt.plot(*list(zip(*res)))
-        plt.savefig(os.path.join(outputPath, "sigma_plot."+label+".png"))
+        plt.savefig(self.path("sigma_plot."+label+".png"))
 
     def dosum(self, mp):
         "evaluate sumrule for specific MP"
         m = self.config["G_m"]
         dimfactor = self.config["G_dimfactor"]
         outputPath = self.config["TEST_outputPath"]
+        label = mp.__name__
 
         self.McolPEvaluatorInstance.MP = mp
+        self.McolPEvaluatorInstance.monitor =\
+                BasicMonitor(self.path("monitor_McolP-%s" % label))
 
-        label = mp.__name__
+        self.SigmaEvaluatorInstance.monitor =\
+                BasicMonitor(self.path("monitor_sigma-%s" % label))
+        self.SumruleEvaluatorInstance.monitor =\
+                BasicMonitor(self.path("monitor_sumrule-%s" % label))
 
         with timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
-            with open(os.path.join(outputPath, "meta"), "a") as f:
+            with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
 
-        with open(os.path.join(outputPath, "sumrule"), "a") as f:
+        with open(self.path("sumrule"), "a") as f:
             self.iwrite(f, "%s::sumrule %f" % (label, sr))
         return sr
 
@@ -112,7 +118,7 @@ class Test(BasicTest):
         s0 = self.dosum(MP0)
         s2 = self.dosum(MP2)
 
-        with open(os.path.join(outputPath, "sumrule"), "a") as f:
+        with open(self.path("sumrule"), "a") as f:
             self.iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1))
 
 
