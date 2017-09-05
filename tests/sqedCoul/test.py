@@ -43,8 +43,9 @@ class Test(BasicTest):
         self.skipPointwise = False
         self._keylist += ["points", "skipPointwise"]
 
-        self.config.readEnv()
+        self.config.readEnv() # get config filename from env
         self.config.readFile(self.configPath)
+        self.config.readEnv() # get other data from env, overwrite file
 
         if not os.path.exists(self.config["TEST_outputPath"]):
             os.makedirs(self.config["TEST_outputPath"])
