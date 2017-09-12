@@ -83,7 +83,7 @@ class Test(BasicTest):
                 BasicMonitor(self.path("monitor_sigma-%s" % label))
 
         with timing() as t:
-            sr = sumev.compute()
+            sr = self.SumruleEvaluatorInstance.compute()
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
 
