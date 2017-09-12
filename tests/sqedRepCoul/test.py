@@ -18,7 +18,7 @@ from sumrules.tools import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
-        super(self.__class__, self).__init__("sqedCoul")
+        super(self.__class__, self).__init__("sqedRepCoul")
 
         self.McolPEvaluatorInstance\
                 = McolPEvaluator(None, psiColP)
