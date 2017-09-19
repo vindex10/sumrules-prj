@@ -12,8 +12,8 @@ from sumrules.analytics import sqedMP0 as MP0\
 from sumrules.evaluators import SumruleEvaluator\
                               , SigmaEvaluator\
                               , TrivialEvaluator
-from sumrules.parallel import npMap, mpMap
-from sumrules.tools import BasicTest, BasicMonitor
+from sumrules.utils.parallel import npMap, mpMap
+from sumrules.basics import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
@@ -21,6 +21,7 @@ class Test(BasicTest):
 
         self.SigmaEvaluatorInstance\
                 = SigmaEvaluator(None)
+        self.SigmaEvaluatorInstance.cyclics.update({1: 0})
         self.SigmaEvaluatorInstance.vectorized = True
         self.SigmaEvaluatorInstance.mapper = npMap
 

@@ -11,8 +11,8 @@ from sumrules.analytics import psiColP\
                              , tmMP as MP
 from sumrules.evaluators import SigmaEvaluator\
                               , McolPEvaluator
-from sumrules.parallel import npMap, mpMap
-from sumrules.tools import BasicTest, BasicMonitor
+from sumrules.utils.parallel import npMap, mpMap
+from sumrules.basics import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
@@ -25,6 +25,7 @@ class Test(BasicTest):
 
         self.SigmaEvaluatorInstance\
                 = SigmaEvaluator(self.McolPEvaluatorInstance)
+        self.SigmaEvaluatorInstance.cyclics.update({1: 0})
         self.SigmaEvaluatorInstance.vectorized = True
         self.SigmaEvaluatorInstance.mapper = mpMap
 

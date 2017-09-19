@@ -3,6 +3,7 @@ from builtins import *
 
 import os
 
+import scipy as sp
 import matplotlib.pyplot as plt
 from utils import timing
 
@@ -10,16 +11,17 @@ import sumrules
 from sumrules.analytics import tmMP as MP
 from sumrules.evaluators import SigmaEvaluator\
                               , TrivialEvaluator
-from sumrules.parallel import npMap, mpMap
-from sumrules.tools import BasicTest, BasicMonitor
+from sumrules.utils.parallel import npMap, mpMap
+from sumrules.basics import BasicTest, BasicMonitor
 
 class Test(BasicTest):
     def __init__(self):
-        super(self.__class__, self).__init__("tmPw")
+        super(Test, self).__init__("tmPw")
 
         self.MPEvaluatorInstance = TrivialEvaluator(MP)
         self.SigmaEvaluatorInstance\
                 = SigmaEvaluator(self.MPEvaluatorInstance)
+        self.SigmaEvaluatorInstance.cyclics.update({1: sp.pi})
         self.SigmaEvaluatorInstance.vectorized = True
         self.SigmaEvaluatorInstance.mapper = npMap
 
@@ -62,7 +64,7 @@ class Test(BasicTest):
         plt.savefig(self.path("sigma_plot."+label+".png"))
 
     def run(self):
-        super(self.__class__, self).run()
+        super(Test, self).run()
 
         points = self.config["TEST_points"]
         minS = self.config["TEST_minS"]
