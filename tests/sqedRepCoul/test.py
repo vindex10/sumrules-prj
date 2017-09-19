@@ -84,8 +84,6 @@ class Test(BasicTest):
         label = mp.__name__
 
         self.McolPEvaluatorInstance.MP = mp
-        self.McolPEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_McolP-%s" % label))
 
         self.SigmaEvaluatorInstance.monitor =\
                 BasicMonitor(self.path("monitor_sigma-%s" % label))
