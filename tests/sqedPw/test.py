@@ -4,7 +4,7 @@ from builtins import * # quite boldly but simply enough
 import os
 
 import matplotlib.pyplot as plt
-from utils import timing
+from tools.utils import timing
 
 import sumrules
 from sumrules.analytics import sqedMP0 as MP0\

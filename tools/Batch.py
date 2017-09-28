@@ -1,10 +1,5 @@
 import os
-import sys
-import subprocess
-from getopt import gnu_getopt
-from ast import literal_eval
 from datetime import datetime
-import numpy as np
 from sumrules.basics import BasicConfigManager
 from sumrules.Config import Config
 
@@ -46,6 +41,11 @@ class Batch(object):
                 os.makedirs(self.path(d))
 
     def writeConfigs(self, spec):
+        with open(self.path("template.conf"), "w") as f:
+            tpl = "".join(("%s = %s\n" % entry\
+                           for entry in self._tpl.items()))
+            f.write(tpl)
+
         cfgs = list()
         for cfg in self.ditor(self._tpl, spec, self.config.copy()):
             config = "\n".join((k+" = "+str(v) for k,v in cfg.items()))
@@ -69,81 +69,4 @@ class Batch(object):
         self.envInit()
         cfgs = self.writeConfigs(spec)
         self.doCalls(cfgs)
-
-def sumruleDitor(data, spec, cfg):
-    tot = sum(spec.T[0])
-    width = data["C_SUMRULE_maxS"]-data["C_SUMRULE_minS"]
-
-    pos = data["C_SUMRULE_minS"]
-    num = 0
-    for part in spec:
-        step = width/tot*part[0]/part[1]
-        
-        for i in range(part[1]):
-            out = data.copy()
-
-            if "TEST_title" not in out.keys():
-                    out.update({"TEST_title": cfg["suffix"]})
-            out["TEST_title"] += "-%d" % num
-            
-            out["C_SUMRULE_minS"] = pos
-            out["C_SUMRULE_maxS"] = pos + step
-
-            out.update({"TECH_numThreads": part[2]
-                       ,"TEST_outputDir": cfg["outputDir"]})
-            
-            pos += step
-            num += 1
-            yield out
-
-def qsubTestCall(prjPath\
-               , testname\
-               , jobName\
-               , cfgPath\
-               , numThreads\
-               , logPath):
-    
-    pbs = "source %s/activate;\n" % prjPath
-    pbs += "cd %s;\n" % os.getcwd()
-    pbs += "PYTHONPATH=%s python %s/tests/%s/test.py --config=%s;\n"\
-          % (prjPath\
-           , prjPath\
-           , testname\
-           , cfgPath)
-
-    qsub = "qsub -l nodes=1:ppn=%d -o %s -j oe -N %s  bash -c \"%s\";\n"\
-            % (numThreads\
-             , logPath\
-             , jobName\
-             , pbs)
-
-    subprocess.call(qsub)
-
-
-
-if __name__ == "__main__":
-    assert len(sys.argv) >= 4
-
-    spec = np.array(literal_eval(sys.argv[3]))
-
-
-    inst = Batch(sumruleDitor, qsubTestCall)
-
-    inst.config["testName"] = sys.argv[1]
-    inst.config["tplPath"] = sys.argv[2]
-
-    opts, rem = gnu_getopt(sys.argv[1:], "o:p:s:", ["odir="\
-                                                   ,"ppath="\
-                                                   ,"suffix="])
-    for opt, arg in opts:
-        if opt in ("-o", "--odir"):
-            inst.config["outputDir"] = arg
-        elif opt in ("-p", "--ppath"):
-            inst.config["prjPath"] = arg
-        elif opt in ("-s", "--suffix"):
-            print(arg)
-            inst.config["suffix"] = arg
-
-    inst.run(spec)
-
 
