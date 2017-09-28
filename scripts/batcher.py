@@ -64,7 +64,7 @@ def qsubTestCall(prjPath\
              , jobName\
              , pbs)
 
-    subprocess.call(qsub)
+    subprocess.call(qsub, shell=True)
 
 def srReduce(path):
     reduced = defaultdict(lambda: 0)
