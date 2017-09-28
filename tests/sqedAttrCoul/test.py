@@ -80,8 +80,8 @@ class Test(BasicTest):
         label = "cont::"+mp.__name__
 
         self.McolPEvaluatorInstance.MP = mp
-        self.SigmaEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_sigma-%s" % label))
+        self.SumruleEvaluatorInstance.monitor =\
+                BasicMonitor(self.path("monitor_sr-%s" % label))
 
         with timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
@@ -93,7 +93,7 @@ class Test(BasicTest):
 
         # flush to initial
         self.McolPEvaluatorInstance.MP = None
-        self.SigmaEvaluatorInstance.monitor = None
+        self.SumruleEvaluatorInstance.monitor = None
         return sr
 
     def doDiscSum(self, mp, psi):

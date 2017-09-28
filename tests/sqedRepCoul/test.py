@@ -84,11 +84,8 @@ class Test(BasicTest):
         label = mp.__name__
 
         self.McolPEvaluatorInstance.MP = mp
-
-        self.SigmaEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_sigma-%s" % label))
         self.SumruleEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_sumrule-%s" % label))
+                BasicMonitor(self.path("monitor_sr-%s" % label))
 
         with timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
@@ -97,6 +94,9 @@ class Test(BasicTest):
 
         with open(self.path("sumrule"), "a") as f:
             self.iwrite(f, "%s::sumrule %f" % (label, sr))
+
+        self.McolPEvaluatorInstance.MP = None
+        self.SumruleEvaluatorInstance.monitor = None
         return sr
 
     def run(self):
