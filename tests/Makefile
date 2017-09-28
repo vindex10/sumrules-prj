@@ -14,6 +14,12 @@ $(addprefix clean_,$(MODELS)):
 
 $(MODELS): clean_$$@
 	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst clean_,,$@) python $@/test.py $(ARGS)
+
+$(addprefix batch_,$(MODELS)): $$(subst batch_,clean_,$@)
+	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py run $(subst batch_,,$@) $(ARGS) -o $(OUTPUT) -p $(PPATH) -s $(subst batch_,,$@)
+
+$(addprefix reduce_,$(MODELS)): $$(subst reduce_,clean_,$@)
+	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py reduce $(OUTPUT)/$(subst reduce_,,$@)/output -o $(OUTPUT)/$(subst reduce_,,$@)/output/reduced
 	
 $(addprefix nice_,$(MODELS)): $$(subst nice_,clean_,$@)
 	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst nice_,,$@) nice python $(subst nice_,,$@)/test.py $(ARGS)

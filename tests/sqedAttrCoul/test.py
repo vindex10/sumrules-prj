@@ -4,7 +4,7 @@ from builtins import * # quite boldly but simply enough
 import os
 
 import matplotlib.pyplot as plt
-from utils import timing
+from tools.utils import timing
 
 import sumrules
 
@@ -59,12 +59,12 @@ class Test(BasicTest):
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
-        self.config.register(self.SumruleEvaluatorInstance, "C_SUMRULE")
-        self.config.register(self.SigmaEvaluatorInstance, "C_SIGMA")
-        self.config.register(self.McolPEvaluatorInstance, "C_MP")
-        self.config.register(self.SumruleDiscEvaluatorInstance, "D_SUMRULE")
-        self.config.register(self.GammaEvaluatorInstance, "D_GAMMA")
-        self.config.register(self.McolPDiscEvaluatorInstance, "D_MP")
+        self.config.register(self.SumruleEvaluatorInstance, "CSUMRULE")
+        self.config.register(self.SigmaEvaluatorInstance, "CSIGMA")
+        self.config.register(self.McolPEvaluatorInstance, "CMP")
+        self.config.register(self.SumruleDiscEvaluatorInstance, "DSUMRULE")
+        self.config.register(self.GammaEvaluatorInstance, "DGAMMA")
+        self.config.register(self.McolPDiscEvaluatorInstance, "DMP")
 
         self.config.readEnv() # get config filename from env
         self.config.readFile(self.configPath)

@@ -5,7 +5,7 @@ import os
 
 import scipy as sp
 import matplotlib.pyplot as plt
-from utils import timing
+from tools.utils import timing
 
 import sumrules
 from sumrules.analytics import tmMP as MP
