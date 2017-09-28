@@ -9,17 +9,17 @@ from tools.Batch import Batch
 
 # Batch handlers
 def sumruleDitor(data, spec, cfg):
-    assert "C_SUMRULE_minS" in data.keys()\
+    assert "CSUMRULE_minS" in data.keys()\
             or\
             "G_m" in data.keys()
 
     tot = sum(spec.T[0])
     try:
-        width = data["C_SUMRULE_maxS"]-data["C_SUMRULE_minS"]
-        pos = data["C_SUMRULE_minS"]
+        width = data["CSUMRULE_maxS"]-data["CSUMRULE_minS"]
+        pos = data["CSUMRULE_minS"]
     except KeyError:
         pos = 4*data["G_m"]**2 + 0.001
-        width = data["C_SUMRULE_maxS"]-pos
+        width = data["CSUMRULE_maxS"]-pos
         
 
     num = 0
@@ -33,11 +33,14 @@ def sumruleDitor(data, spec, cfg):
                     out.update({"TEST_title": cfg["suffix"]})
             out["TEST_title"] += "-%d" % num
             
-            out["C_SUMRULE_minS"] = pos
-            out["C_SUMRULE_maxS"] = pos + step
+            out["CSUMRULE_minS"] = pos
+            out["CSUMRULE_maxS"] = pos + step
 
             out.update({"TECH_numThreads": part[2]
-                       ,"TEST_outputDir": cfg["outputDir"]})
+                       ,"TEST_outputPath": os.path.join(cfg["outputDir"]\
+                                                      , cfg["suffix"]\
+                                                      , "output"\
+                                                      , out["TEST_title"])})
             
             pos += step
             num += 1
