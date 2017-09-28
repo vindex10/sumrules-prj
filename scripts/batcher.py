@@ -50,20 +50,21 @@ def qsubTestCall(prjPath\
                , numThreads\
                , logPath):
     
-    pbs = "source %s/activate;\n" % prjPath
-    pbs += "cd %s;\n" % os.getcwd()
+    pbs = "cd %s;\n" % os.getcwd()
+    pbs += "source %s/activate;\n" % prjPath
     pbs += "PYTHONPATH=%s python %s/tests/%s/test.py --config=%s;\n"\
           % (prjPath\
            , prjPath\
            , testname\
            , cfgPath)
 
-    qsub = "qsub -l nodes=1:ppn=%d -o %s -j oe -N %s  bash -c \"%s\";\n"\
-            % (numThreads\
+    qsub = "echo \"%s\" | qsub -l nodes=1:ppn=%d -o %s -j oe -N %s\n"\
+            % (pbs\
+             , numThreads\
              , logPath\
-             , jobName\
-             , pbs)
+             , jobName)
 
+    print(qsub)
     subprocess.call(qsub, shell=True)
 
 def srReduce(path):
