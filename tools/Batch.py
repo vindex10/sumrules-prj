@@ -12,6 +12,7 @@ class Batch(object):
                              ,"testName": ""
                              ,"tplPath": "template.cfg"
                              ,"suffix": datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                             ,"shift": 0
                         })
         self.ditor = ditor
         self.call = call
@@ -29,8 +30,8 @@ class Batch(object):
                 })
     def path(self, *paths):
         return os.path.join(self.config["outputDir"]\
-                          , self.config["suffix"]\
-                          , *paths)
+                           ,self.config["suffix"]\
+                           ,*paths)
 
     def envInit(self):
         dirs = ("logs", "output", "configs")

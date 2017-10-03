@@ -23,7 +23,7 @@ def sumruleDitor(data, spec, cfg):
         width = data["CSUMRULE_maxS"]-pos
         
 
-    num = 0
+    num = cfg["shift"]
     for part in spec:
         step = width/tot*part[0]/part[1]
         
@@ -92,17 +92,22 @@ def batchRun(args):
     inst.config["testName"] = args[0]
     inst.config["tplPath"] = args[1]
 
-    opts, rem = gnu_getopt(args, "o:p:s:", ("odir="\
+    opts, rem = gnu_getopt(args, "o:p:s:t:",("odir="\
                                            ,"ppath="\
-                                           ,"suffix="))
+                                           ,"suffix="
+                                           ,"shift="))
     for opt, arg in opts:
         if opt in ("-o", "--odir"):
             inst.config["outputDir"] = arg
         elif opt in ("-p", "--ppath"):
             inst.config["prjPath"] = arg
         elif opt in ("-s", "--suffix"):
-            print(arg)
             inst.config["suffix"] = arg
+        elif opt in ("-t", "--shift"):
+            try:
+                inst.config["shift"] = int(arg)
+            except ValueError:
+                pass
 
     spec = np.array(ast.literal_eval(args[2]))
     inst.run(spec)
