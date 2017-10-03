@@ -1,38 +1,36 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import * # quite boldly but simply enough
+from builtins import *
 
 import os
 
 import matplotlib.pyplot as plt
-from tools.utils import timing
+import tools.utils as t_utils
 
 import sumrules
-from sumrules.analytics import psiColP\
-                             , sqedMP0 as MP0\
-                             , sqedMP2 as MP2
-from sumrules.evaluators import SumruleEvaluator\
-                              , SigmaEvaluator\
-                              , McolPEvaluator
-from sumrules.utils.parallel import npMap, mpMap
-from sumrules.basics import BasicTest, BasicMonitor
+import sumrules.lib.analytics as alyt
+import sumrules.lib.evaluators as evals
+
+from sumrules.utils import parallel
+from sumrules.misc.Test import Test as BasicTest
+from sumrules.misc.Monitor import Monitor
 
 class Test(BasicTest):
     def __init__(self):
         super(self.__class__, self).__init__("sqedRepCoul")
 
         self.McolPEvaluatorInstance\
-                = McolPEvaluator(None, psiColP)
+                = evals.McolPEvaluator(None, alyt.psiColP)
         self.McolPEvaluatorInstance.vectorized = True
-        self.McolPEvaluatorInstance.mapper = npMap
+        self.McolPEvaluatorInstance.mapper = parallel.npMap
 
         self.SigmaEvaluatorInstance\
-                = SigmaEvaluator(self.McolPEvaluatorInstance)
+                = evals.SigmaEvaluator(self.McolPEvaluatorInstance)
         self.SigmaEvaluatorInstance.cyclics.update({1: 0})
 
         self.SumruleEvaluatorInstance\
-                = SumruleEvaluator(self.SigmaEvaluatorInstance)
+                = evals.SumruleEvaluator(self.SigmaEvaluatorInstance)
         self.SumruleEvaluatorInstance.vectorized = True
-        self.SumruleEvaluatorInstance.mapper = mpMap
+        self.SumruleEvaluatorInstance.mapper = parallel.mpMap
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
@@ -62,7 +60,7 @@ class Test(BasicTest):
 
         label = mp.__name__
 
-        with timing() as t:
+        with t_utils.timing() as t:
             res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
@@ -85,9 +83,9 @@ class Test(BasicTest):
 
         self.McolPEvaluatorInstance.MP = mp
         self.SumruleEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_sr-%s" % label))
+                Monitor(self.path("monitor_sr-%s" % label))
 
-        with timing() as t:
+        with t_utils.timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
@@ -111,11 +109,11 @@ class Test(BasicTest):
         if not self.skipPointwise:
             thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
 
-            self.pointwiseSigma(MP0, thepoints)
-            self.pointwiseSigma(MP2, thepoints)
+            self.pointwiseSigma(alyt.sqedMP0, thepoints)
+            self.pointwiseSigma(alyt.sqedMP2, thepoints)
 
-        s0 = self.dosum(MP0)
-        s2 = self.dosum(MP2)
+        s0 = self.dosum(alyt.sqedMP0)
+        s2 = self.dosum(alyt.sqedMP2)
 
         with open(self.path("sumrule"), "a") as f:
             self.iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1))

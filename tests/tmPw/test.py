@@ -5,25 +5,26 @@ import os
 
 import scipy as sp
 import matplotlib.pyplot as plt
-from tools.utils import timing
+from tools import utils as t_utils
 
 import sumrules
-from sumrules.analytics import tmMP as MP
-from sumrules.evaluators import SigmaEvaluator\
-                              , TrivialEvaluator
-from sumrules.utils.parallel import npMap, mpMap
-from sumrules.basics import BasicTest, BasicMonitor
+import sumrules.lib.analytics as alyt
+import sumrules.lib.evaluators as evals
+
+from sumrules.utils import parallel
+from sumrules.misc.Test import Test as BasicTest
+from sumrules.misc.Monitor import Monitor
 
 class Test(BasicTest):
     def __init__(self):
         super(Test, self).__init__("tmPw")
 
-        self.MPEvaluatorInstance = TrivialEvaluator(MP)
+        self.MPEvaluatorInstance = evals.TrivialEvaluator(alyt.tmMP)
         self.SigmaEvaluatorInstance\
-                = SigmaEvaluator(self.MPEvaluatorInstance)
+                = evals.SigmaEvaluator(self.MPEvaluatorInstance)
         self.SigmaEvaluatorInstance.cyclics.update({1: sp.pi})
         self.SigmaEvaluatorInstance.vectorized = True
-        self.SigmaEvaluatorInstance.mapper = npMap
+        self.SigmaEvaluatorInstance.mapper = parallel.npMap
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
@@ -49,7 +50,7 @@ class Test(BasicTest):
 
         label = "MP"
 
-        with timing() as t:
+        with t_utils.timing() as t:
             res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))

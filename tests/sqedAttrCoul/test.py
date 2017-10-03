@@ -1,28 +1,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import * # quite boldly but simply enough
+from builtins import *
 
 import os
 
 import matplotlib.pyplot as plt
-from tools.utils import timing
+import tools.utils as t_utils
 
 import sumrules
+import sumrules.lib.analytics as alyt
+import sumrules.lib.evaluators as evals
 
-from sumrules.analytics import psiColP\
-                             , psiColPdisc\
-                             , energColDisc\
-                             , sqedMP0 as MP0\
-                             , sqedMP2 as MP2
-
-from sumrules.evaluators import SumruleEvaluator\
-                              , SigmaEvaluator\
-                              , McolPEvaluator\
-                              , SumruleDiscEvaluator\
-                              , GammaDiscEvaluator\
-                              , McolPDiscEvaluator
-
-from sumrules.utils.parallel import npMap, mpMap
-from sumrules.basics import BasicTest, BasicMonitor
+from sumrules.utils import parallel
+from sumrules.misc.Test import Test as BasicTest
+from sumrules.misc.Monitor import Monitor
 
 class Test(BasicTest):
     def __init__(self):
@@ -31,31 +21,31 @@ class Test(BasicTest):
 
         # Continuous spectrum evaluators
         self.McolPEvaluatorInstance\
-                = McolPEvaluator(None, psiColP)
+                = evals.McolPEvaluator(None, alyt.psiColP)
         self.McolPEvaluatorInstance.vectorized = True
-        self.McolPEvaluatorInstance.mapper = npMap
+        self.McolPEvaluatorInstance.mapper = parallel.npMap
 
         self.SigmaEvaluatorInstance\
-                = SigmaEvaluator(self.McolPEvaluatorInstance)
+                = evals.SigmaEvaluator(self.McolPEvaluatorInstance)
         self.SigmaEvaluatorInstance.cyclics.update({1: 0})
 
         self.SumruleEvaluatorInstance\
-                = SumruleEvaluator(self.SigmaEvaluatorInstance)
+                = evals.SumruleEvaluator(self.SigmaEvaluatorInstance)
         self.SumruleEvaluatorInstance.vectorized = True
-        self.SumruleEvaluatorInstance.mapper = mpMap
+        self.SumruleEvaluatorInstance.mapper = parallel.mpMap
 
 
         # Discrete spectrum evaluators
         self.McolPDiscEvaluatorInstance\
-                = McolPDiscEvaluator(None, None, energColDisc)
+                = evals.McolPDiscEvaluator(None, None, alyt.energColDisc)
         self.McolPDiscEvaluatorInstance.vectorized = True
-        self.McolPDiscEvaluatorInstance.mapper = npMap
+        self.McolPDiscEvaluatorInstance.mapper = parallel.npMap
 
         self.GammaEvaluatorInstance\
-                = GammaDiscEvaluator(self.McolPDiscEvaluatorInstance)
+                = evals.GammaDiscEvaluator(self.McolPDiscEvaluatorInstance)
 
         self.SumruleDiscEvaluatorInstance\
-                = SumruleDiscEvaluator(self.GammaEvaluatorInstance)
+                = evals.SumruleDiscEvaluator(self.GammaEvaluatorInstance)
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
@@ -70,10 +60,13 @@ class Test(BasicTest):
         self.config.readFile(self.configPath)
         self.config.readEnv() # get other data from env, overwrite file
 
-        assert self.config["G_g"]<0
-
         if not os.path.exists(self.config["TEST_outputPath"]):
             os.makedirs(self.config["TEST_outputPath"])
+
+        if self.config["G_g"] > 0:
+            with open(self.path("params"), "a") as f: 
+                self.iwrite(f, "WARN! coupling was forced to become negative")
+            self.config["G_g"] *= -1
 
     def doContSum(self, mp):
         "evaluate sumrule for specific MP"
@@ -81,9 +74,9 @@ class Test(BasicTest):
 
         self.McolPEvaluatorInstance.MP = mp
         self.SumruleEvaluatorInstance.monitor =\
-                BasicMonitor(self.path("monitor_sr-%s" % label))
+                Monitor(self.path("monitor_sr-%s" % label))
 
-        with timing() as t:
+        with t_utils.timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
@@ -103,7 +96,7 @@ class Test(BasicTest):
         self.McolPDiscEvaluatorInstance.MP = mp
         self.McolPDiscEvaluatorInstance.psiColP = psi
 
-        with timing() as t:
+        with t_utils.timing() as t:
             sr = self.SumruleDiscEvaluatorInstance.compute()
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sumrule_evaltime %f" % (label, t()))
@@ -119,13 +112,13 @@ class Test(BasicTest):
     def run(self):
         super(self.__class__, self).run()
 
-        s0 = self.doContSum(MP0)
-        s2 = self.doContSum(MP2)
+        s0 = self.doContSum(alyt.sqedMP0)
+        s2 = self.doContSum(alyt.sqedMP2)
 
-        ds0 = self.doDiscSum(MP0\
-                           , lambda n,l,p,T,F: psiColPdisc(n, l, 0, p, T, F))
-        ds2 = self.doDiscSum(MP2\
-                           , lambda n,l,p,T,F: psiColPdisc(n, l, 2, p, T, F))
+        ds0 = self.doDiscSum(alyt.sqedMP0\
+                           , lambda n,l,p,T,F: alyt.psiColPdisc(n, l, 0, p, T, F))
+        ds2 = self.doDiscSum(alyt.sqedMP2\
+                           , lambda n,l,p,T,F: alyt.psiColPdisc(n, l, 2, p, T, F))
 
         with open(self.path("sumrule"), "a") as f:
             self.iwrite(f, "ratio %f" % (((s0+ds0) - (s2+ds2))/(s2+ds2) - 1))

@@ -1,9 +1,9 @@
-from timeit import default_timer as timer
+import timeit
 
 class timing:
     def __enter__(self):
-        timestop = timer()
-        return lambda: timer() - timestop
+        timestop = timeit.default_timer()
+        return lambda: timeit.default_timer() - timestop
     
     def __exit__(self, type, value, traceback):
         pass

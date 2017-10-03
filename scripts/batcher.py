@@ -1,9 +1,10 @@
+import ast
+import collections
+import getopt
 import os
-import sys
 import subprocess
-from collections import defaultdict
-from getopt import gnu_getopt
-from ast import literal_eval
+import sys
+
 import numpy as np
 from tools.Batch import Batch
 
@@ -71,7 +72,7 @@ def qsubTestCall(prjPath\
     subprocess.call(qsub, shell=True)
 
 def srReduce(path):
-    reduced = defaultdict(lambda: 0)
+    reduced = collections.defaultdict(lambda: 0)
     subtests = (os.path.join(path, d) for d in os.listdir(path)\
                     if os.path.isdir(os.path.join(path, d)))
     for subtest in subtests:
@@ -91,9 +92,9 @@ def batchRun(args):
     inst.config["testName"] = args[0]
     inst.config["tplPath"] = args[1]
 
-    opts, rem = gnu_getopt(args, "o:p:s:", ["odir="\
-                                                   ,"ppath="\
-                                                   ,"suffix="])
+    opts, rem = gnu_getopt(args, "o:p:s:", ("odir="\
+                                           ,"ppath="\
+                                           ,"suffix="))
     for opt, arg in opts:
         if opt in ("-o", "--odir"):
             inst.config["outputDir"] = arg
@@ -103,13 +104,13 @@ def batchRun(args):
             print(arg)
             inst.config["suffix"] = arg
 
-    spec = np.array(literal_eval(args[2]))
+    spec = np.array(ast.literal_eval(args[2]))
     inst.run(spec)
 
 def batchReduce(args):
     assert len(args) >= 1
     
-    opts, rem = gnu_getopt(args, "o:", ["output="])
+    opts, rem = getopt.gnu_getopt(args, "o:", ("output=",))
 
     output = None
     for opt, arg in opts:

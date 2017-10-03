@@ -1,33 +1,33 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from builtins import * # quite boldly but simply enough
+from builtins import *
 
 import os
 
 import matplotlib.pyplot as plt
-from tools.utils import timing
+import tools.utils as t_utils
 
 import sumrules
-from sumrules.analytics import psiColP\
-                             , tmMP as MP
-from sumrules.evaluators import SigmaEvaluator\
-                              , McolPEvaluator
-from sumrules.utils.parallel import npMap, mpMap
-from sumrules.basics import BasicTest, BasicMonitor
+import sumrules.lib.analytics as alyt
+import sumrules.lib.evaluators as evals
+
+from sumrules.utils import parallel
+from sumrules.misc.Test import Test as BasicTest
+from sumrules.misc.Monitor import Monitor
 
 class Test(BasicTest):
     def __init__(self):
         super(self.__class__, self).__init__("tmCoul")
 
         self.McolPEvaluatorInstance\
-                = McolPEvaluator(MP, psiColP)
+                = evals.McolPEvaluator(alyt.tmMP, alyt.psiColP)
         self.McolPEvaluatorInstance.vectorized = True
-        self.McolPEvaluatorInstance.mapper = npMap
+        self.McolPEvaluatorInstance.mapper = parallel.npMap
 
         self.SigmaEvaluatorInstance\
-                = SigmaEvaluator(self.McolPEvaluatorInstance)
+                = evals.SigmaEvaluator(self.McolPEvaluatorInstance)
         self.SigmaEvaluatorInstance.cyclics.update({1: 0})
         self.SigmaEvaluatorInstance.vectorized = True
-        self.SigmaEvaluatorInstance.mapper = mpMap
+        self.SigmaEvaluatorInstance.mapper = parallel.mpMap
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
@@ -54,7 +54,7 @@ class Test(BasicTest):
 
         label = "MP"
 
-        with timing() as t:
+        with t_utils.timing() as t:
             res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
             with open(self.path("meta"), "a") as f:
                 self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))

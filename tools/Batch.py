@@ -1,6 +1,7 @@
 import os
-from datetime import datetime
-from sumrules.basics import BasicConfigManager
+import datetime
+
+from sumrules.misc.ConfigManager import ConfigManager
 from sumrules.Config import Config
 
 class Batch(object):
@@ -10,21 +11,21 @@ class Batch(object):
                              ,"prjPath": "."
                              ,"testName": ""
                              ,"tplPath": "template.cfg"
-                             ,"suffix": datetime.now().strftime("%Y%m%d%H%M%S")
+                             ,"suffix": datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                         })
         self.ditor = ditor
         self.call = call
     
     def readFile(self, f):
         for line in f:
-            matching = BasicConfigManager._cfgre.match(line)
+            matching = ConfigManager._cfgre.match(line)
             if not matching:
                 continue
             pair = [v for v in matching.groups()\
                         if v is not None]
             if len(pair) > 0:
                 self._tpl.update({
-                    pair[0]: BasicConfigManager._parseStr(pair[1])
+                    pair[0]: ConfigManager._parseStr(pair[1])
                 })
     def path(self, *paths):
         return os.path.join(self.config["outputDir"]\
@@ -32,7 +33,7 @@ class Batch(object):
                           , *paths)
 
     def envInit(self):
-        dirs = ["logs", "output", "configs"]
+        dirs = ("logs", "output", "configs")
         if not os.path.isdir(self.path()):
             os.makedirs(self.path())
 
@@ -57,11 +58,11 @@ class Batch(object):
     def doCalls(self, cfgs):
         for cfg in cfgs:
             self.call(self.config["prjPath"]\
-                    , self.config["testName"]\
-                    , cfg["TEST_title"]\
-                    , self.path("configs", "%s.conf" % cfg["TEST_title"])
-                    , cfg["TECH_numThreads"]
-                    , self.path("logs", "%s.log" % cfg["TEST_title"]))
+                     ,self.config["testName"]\
+                     ,cfg["TEST_title"]\
+                     ,self.path("configs", "%s.conf" % cfg["TEST_title"])
+                     ,cfg["TECH_numThreads"]
+                     ,self.path("logs", "%s.log" % cfg["TEST_title"]))
 
     def run(self, spec):
         with open(self.config["tplPath"], "r") as f:
