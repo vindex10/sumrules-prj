@@ -1,3 +1,17 @@
+"""@file
+Implementation of functions to feed into tools::Batch::Batch, and
+become able to run tests in parallel way at a cluster.
+
+Cli args for `batch`:
+    * -o, --odir: where to store batch outputs, logs, configs, etc.
+    * -p, -ppath: path to sumrule-prj root.
+    * -s, --suffix: name to distinguish different runs of the same test.
+    * -t, --shift: set shift to start numbering not from 0.
+
+Cli args for `reduce`:
+    * -o, --output: path to where `reduce` should store its output,
+        if not defined, output goes to stdout.
+"""
 import ast
 import collections
 import getopt
@@ -8,8 +22,31 @@ import sys
 import numpy as np
 from tools.Batch import Batch
 
-# Batch handlers
 def sumruleDitor(data, spec, cfg):
+    """ Sumrule distributor.
+        
+        Breaks `data` into a group of configs according to `spec`,
+        taking into account Batch config `cfg`.
+
+        Args:
+            data: dict of config file entries.
+            spec: list of tuples. A rule according to which configs
+                should be distributed.
+
+                For spec:
+
+                    >>> [[3, 4, 2], [2, 6, 1]]
+                
+                integration range over `s` will be broken as 2:1,
+                then first part will be broken in 3 equal parts by `s`.
+                For each of these 3 parts will be allocated 4 processors.
+                The second part will be broken in 2 equal parts by `s`, and
+                for each of these 2 parts will be allocated 6 processors.
+            cfg: stores key-value pairs of Batch configuration.
+
+        Yields:
+            A config file.
+    """
     assert "CSUMRULE_minS" in data.keys()\
             or\
             "G_m" in data.keys()
@@ -53,6 +90,19 @@ def qsubTestCall(prjPath\
                , cfgPath\
                , numThreads\
                , logPath):
+    """ Call qsub with corresponding args.
+        
+        Args:
+            prjPath: a path to sumrules-prj root.
+            testname: name of dir with a test.
+            jobName: job title for `qstat` output.
+            cfgPath: path to config file for test.
+            numThreads: number of threads to allocate for job.
+            logPath: path to log file, for qsub output.
+
+        Returns:
+            Nothig.
+    """
     
     pbs = "cd %s;\n" % os.getcwd()
     pbs += "source %s/activate;\n" % prjPath
@@ -72,6 +122,14 @@ def qsubTestCall(prjPath\
     subprocess.call(qsub, shell=True)
 
 def srReduce(path):
+    """ Compute total for each field stored in `sumrule` output file.
+
+        Args:
+            path: path to where dirs with test outputs stored.
+
+        Returns:
+            A dict with totals per field through all outputs.
+    """
     reduced = collections.defaultdict(lambda: 0)
     subtests = (os.path.join(path, d) for d in os.listdir(path)\
                     if os.path.isdir(os.path.join(path, d)))
@@ -86,6 +144,17 @@ def srReduce(path):
 
 # cli handlers
 def batchRun(args):
+    """ Command to call when `batcher.py batch *args` is called.
+        
+        Args:
+            args: rest of `*args` after command `batch`.
+                * args[0] - test name.
+                * args[1] - path to config, which will be pralellized.
+                * args[2] - spec in usual format (list of lists).
+
+        Returns:
+            Nothing.
+    """
     assert len(args) >= 3
     inst = Batch(sumruleDitor, qsubTestCall)
 
@@ -113,6 +182,12 @@ def batchRun(args):
     inst.run(spec)
 
 def batchReduce(args):
+    """ A command to be called when `batcher.py reduce` called.
+        
+        Args:
+            args: rest of cli args after `reduce` command.
+                * args[0] - path to dir where test stores outputs.
+    """
     assert len(args) >= 1
     
     opts, rem = getopt.gnu_getopt(args, "o:", ("output=",))
