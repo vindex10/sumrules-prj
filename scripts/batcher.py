@@ -161,7 +161,7 @@ def batchRun(args):
     inst.config["testName"] = args[0]
     inst.config["tplPath"] = args[1]
 
-    opts, rem = gnu_getopt(args, "o:p:s:t:",("odir="\
+    opts, rem = getopt.gnu_getopt(args, "o:p:s:t:",("odir="\
                                            ,"ppath="\
                                            ,"suffix="
                                            ,"shift="))
