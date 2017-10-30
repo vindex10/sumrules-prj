@@ -23,7 +23,7 @@ $(addprefix batch_,$(MODELS)): $$(subst batch_,clean_,$@)
 	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py run $(subst batch_,,$@) $(ARGS) -o $(OUTPUT) -p $(PPATH) -s $(subst batch_,,$@)
 
 $(addprefix reduce_,$(MODELS)): $$(subst reduce_,clean_,$@)
-	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py reduce $(OUTPUT)/$(subst reduce_,,$@)/output -o $(OUTPUT)/$(subst reduce_,,$@)/output/reduced
+	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py reduce $(OUTPUT)/$(subst reduce_,,$@)/output -o $(OUTPUT)/$(subst reduce_,,$@)/reduced
 	
 $(addprefix debug_,$(MODELS)): $$(subst debug_,clean_,$@)
 	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst debug_,,$@) nice python -m ipdb $(subst debug_,,$@)/test.py $(ARGS)

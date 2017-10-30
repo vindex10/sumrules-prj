@@ -195,7 +195,7 @@ def batchReduce(args):
     output = None
     for opt, arg in opts:
         if opt in ("-o", "--output"):
-            output = open(arg, "w")
+            output = arg
 
     reduced = srReduce(args[0])
     
