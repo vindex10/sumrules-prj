@@ -43,6 +43,8 @@ elif len(sys.argv) == 2:
 else:
     raise TypeError("Wrong arguments for plot.py")
 
+fname = os.path.basename(os.path.normpath(fname))
+
 data = gather(searchdir, fname, x, y)
 plt.plot(*data.T, ".")
 plt.savefig("%s.png" % fname)
