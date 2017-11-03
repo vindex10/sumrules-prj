@@ -1,12 +1,44 @@
 #!/usr/bin/env python
+"""@file
+Script to build a plot of a gathered data.
+
+If there is no such file, look through subdirs to gather data.
+
+plot.py <fname> [(x y)] [(-d | --dir)]
+
+CLI Args:
+    * fname: filename to look for.
+    * x: column corresponding to x axis.
+    * y: column corresponding to y axis.
+    * -d, --dir: path to dir where to start looking for file.
+
+Returns:
+    Plot with name `fname.png` stored at `path`.
+"""
 
 import os
 import sys
+import getopt
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 def gather(path, fname, x, y):
+    """ Gather data from `fname`.
+        
+        Take columns `x` and `y` only. In case, if `fname` does not exist,
+        look through subdirs at `path`.
+
+        Args:
+            path: path to dir where to start looking for file.
+            fname: filename to look for.
+            x: column corresponding to x axis.
+            y: column corresponding to y axis.
+        
+        Returns:
+            NumPy array of (x, y) pairs, taken from found files.
+    """
+
     fullname = os.path.join(path, fname)
     try:
         data = np.loadtxt(fullname, usecols=(x, y))
@@ -25,26 +57,55 @@ def gather(path, fname, x, y):
             data = np.empty(shape=(0, 2))
     return data
 
-searchdir = "."
-x = 0
-y = 1
+def parse_args(args):
+    """ Parse cli arguments.
+        
+        According to prototype:
 
-if len(sys.argv) == 5:
-    searchdir = sys.argv[1]
-    fname = sys.argv[2]
-    x = int(sys.argv[3])
-    y = int(sys.argv[4])
-elif len(sys.argv) == 4:
-    fname = sys.argv[1]
-    x = int(sys.argv[2])
-    y = int(sys.argv[3])
-elif len(sys.argv) == 2:
-    fname = sys.argv[1]
-else:
-    raise TypeError("Wrong arguments for plot.py")
+        plot.py <fname> [(x y)] [(-d | --dir)]
 
-fname = os.path.basename(os.path.normpath(fname))
+        CLI Args:
+            * fname: filename to look for.
+            * x: column corresponding to x axis.
+            * y: column corresponding to y axis.
+            * -d, --dir: path to dir where to start looking for file.
 
-data = gather(searchdir, fname, x, y)
-plt.plot(*data.T, ".")
-plt.savefig("%s.png" % fname)
+        Returns:
+            Tuple. (searchdir, fname, x, y).
+    """
+    searchdir = "."
+    x = 0
+    y = 1
+
+    opts, parsed_args = getopt.gnu_getopt(args, "d:", ["dir="])
+    for o, a in opts:
+        if o in ("-d", "--dir"):
+            searchdir = a
+
+    fname = parsed_args[0]
+
+    if len(args) == 3:
+        x = int(parsed_args[1])
+        y = int(parsed_args[2])
+
+    fname = os.path.basename(os.path.normpath(fname))
+
+    return searchdir, fname, x, y
+
+def plot(data, fname):
+    """ Plot `data` and save to cwd.
+        
+        Args:
+            data: NumPy array of (x,y) pairs.
+            fname: Name of output file.
+
+        Returns:
+            Nothing.
+    """
+    plt.plot(*data.T, ".")
+    plt.savefig("%s.png" % fname)
+
+if __name__ == "__main__":
+    parsed_args = parse_args(sys.argv[1:])
+    data = gather(*parsed_args)
+    plot(data, parsed_args[1])

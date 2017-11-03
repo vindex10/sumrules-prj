@@ -1,19 +1,19 @@
 #!/usr/bin/env python
-
 """@file
 Implementation of functions to feed into tools::Batch::Batch, and
 become able to run tests in parallel way at a cluster.
 
-Cli args for `batch`:
+CLI Args for `batch`:
     * -o, --odir: where to store batch outputs, logs, configs, etc.
     * -p, -ppath: path to sumrule-prj root.
     * -s, --suffix: name to distinguish different runs of the same test.
     * -t, --shift: set shift to start numbering not from 0.
 
-Cli args for `reduce`:
+CLI Args for `reduce`:
     * -o, --output: path to where `reduce` should store its output,
         if not defined, output goes to stdout.
 """
+
 import ast
 import collections
 import getopt
