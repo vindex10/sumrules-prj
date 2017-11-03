@@ -1,0 +1,4 @@
+wd=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+. $wd/../activate
+export PATH=$wd:$PATH

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """@file
 Implementation of functions to feed into tools::Batch::Batch, and
 become able to run tests in parallel way at a cluster.
