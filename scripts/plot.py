@@ -11,7 +11,12 @@ def gather(path, fname, x, y):
     except FileNotFoundError:
         datalist = list()
         for f in os.listdir(path):
-            datalist.append(gather(os.path.join(path, f), fname, x, y))
+            subpath = os.path.join(path, f)
+            if os.path.isdir(subpath):
+                datalist.append(gather(os.path.join(path, f)\
+                                      ,fname
+                                      ,x
+                                      ,y))
         try:
             data = np.vstack(tuple(datalist))
         except ValueError:
