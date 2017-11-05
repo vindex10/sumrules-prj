@@ -5,3 +5,5 @@ __pycache__
 /doc/doxygen
 
 /tests/output
+/tests/configs/*
+!/test/configs/*.conf
