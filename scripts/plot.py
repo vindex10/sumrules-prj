@@ -42,6 +42,8 @@ def gather(path, fname, x, y):
     fullname = os.path.join(path, fname)
     try:
         data = np.loadtxt(fullname, usecols=(x, y))
+        if len(data.shape) == 0:
+            raise FileNotFoundError
     except FileNotFoundError:
         datalist = list()
         for f in os.listdir(path):
