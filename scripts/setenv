@@ -1,4 +1,4 @@
-wd=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+wd=$(dirname $(readlink -f "${BASH_SOURCE[@]}"))
 
 . $wd/../activate
 export PATH=$wd:$PATH
