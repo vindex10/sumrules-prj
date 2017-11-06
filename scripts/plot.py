@@ -98,6 +98,17 @@ def parse_args(args):
     return searchdir, fname, x, y
 
 def integr(data):
+    """ Estimate integral by given data.
+        
+        Use CubicSpline to interpolate `data`, then use quadrature for
+        integration.
+
+        Args:
+            data: NumPy array of (x, y) pairs.
+
+        Returns:
+            NumPy array. (Integral, Error) pair.
+    """
     cleaned = np.unique(data[data[:,0].argsort()], axis=0)
     inter = sp.interpolate.CubicSpline(cleaned[:, 0], cleaned[:, 1])
     return sp.integrate.quad(inter, cleaned[0, 0], cleaned[-1,0])
