@@ -39,11 +39,11 @@ def sumruleDitor(data, spec, cfg):
 
                     >>> [[3, 4, 2], [2, 6, 1]]
                 
-                integration range over `s` will be broken as 2:1,
-                then first part will be broken in 3 equal parts by `s`.
-                For each of these 3 parts will be allocated 4 processors.
-                The second part will be broken in 2 equal parts by `s`, and
-                for each of these 2 parts will be allocated 6 processors.
+                integration range over `s` will be broken as 3:2,
+                then first part will be broken in 4 equal parts by `s`.
+                For each of these 4 parts will be allocated 2 processors.
+                The second part will be broken in 6 equal parts by `s`, and
+                for each of these 6 parts will be allocated 1 processor.
             cfg: stores key-value pairs of Batch configuration.
 
         Yields:
