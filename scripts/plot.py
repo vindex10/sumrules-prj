@@ -21,6 +21,9 @@ import sys
 import getopt
 
 import numpy as np
+import scipy as sp
+from scipy import integrate
+from scipy import interpolate
 import matplotlib.pyplot as plt
 
 def gather(path, fname, x, y):
@@ -94,6 +97,11 @@ def parse_args(args):
 
     return searchdir, fname, x, y
 
+def integr(data):
+    cleaned = np.unique(data[data[:,0].argsort()], axis=0)
+    inter = sp.interpolate.CubicSpline(cleaned[:, 0], cleaned[:, 1])
+    return sp.integrate.quad(inter, cleaned[0, 0], cleaned[-1,0])
+
 def plot(data, fname):
     """ Plot `data` and save to cwd.
         
@@ -105,6 +113,8 @@ def plot(data, fname):
             Nothing.
     """
     plt.plot(*data.T, ".")
+    int_est = integr(data)
+    plt.figtext(.02, .02, "Integral: %s" % str(int_est))
     plt.savefig("%s.png" % fname)
 
 if __name__ == "__main__":
