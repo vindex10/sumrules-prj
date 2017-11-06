@@ -136,10 +136,13 @@ def srReduce(path):
     subtests = (os.path.join(path, d) for d in os.listdir(path)\
                     if os.path.isdir(os.path.join(path, d)))
     for subtest in subtests:
-        with open(os.path.join(subtest, "sumrule"), "r") as f:
-            for line in f:
-                k, v = line.split(" ")
-                reduced[k] += float(v)
+        try:
+            with open(os.path.join(subtest, "sumrule"), "r") as f:
+                for line in f:
+                    k, v = line.split(" ")
+                    reduced[k] += float(v)
+        except FileNotFoundError:
+            pass
 
     return reduced
 
