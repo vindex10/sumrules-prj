@@ -98,11 +98,6 @@ class Batch(object):
             Returns:
                 List of dicts. Config files for all jobs.
         """
-        with open(self.path("template.conf"), "w") as f:
-            tpl = "".join(("%s = %s\n" % entry\
-                           for entry in self._tpl.items()))
-            f.write(tpl)
-
         cfgs = list()
         for cfg in self.ditor(self._tpl, spec, self.config.copy()):
             config = "\n".join((k+" = "+str(v) for k,v in cfg.items()))
