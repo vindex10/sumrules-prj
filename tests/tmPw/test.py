@@ -1,4 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import\
+                      ,division\
+                      ,print_function\
+                      ,unicode_literals
 from builtins import *
 
 import os
@@ -51,9 +54,11 @@ class Test(BasicTest):
         label = "MP"
 
         with t_utils.timing() as t:
-            res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
+            res = [(s, self.SigmaEvaluatorInstance.compute(s)\
+                    for s in points]
             with open(self.path("meta"), "a") as f:
-                self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
+                self.iwrite(f, "%s::sigma_evaltime(%d) %f"\
+                        % (label, len(points), t()))
 
         with open(self.path("sigma"), "a") as f:
             self.iwrite(f, "# %s" % label)
@@ -72,7 +77,8 @@ class Test(BasicTest):
         maxS = self.config["TEST_maxS"]
         outputPath = self.config["TEST_outputPath"]
 
-        thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
+        thepoints = [minS + (maxS - minS)/points*i\
+                for i in range(points)]
         self.pointwiseSigma(thepoints)
 
 if __name__ == "__main__":
