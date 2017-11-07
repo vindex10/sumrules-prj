@@ -92,7 +92,7 @@ class Test(BasicTest):
         evalPrec(0)
         for p in range(1,prec+1):
             evalPrec(p)
-            ax.plot(sp.full_like(answ[p][0], p), sp.absolute(answ[p][0] - answ[p-1][0]), ".")
+            ax.plot(p, sp.linalg.norm(answ[p][0] - answ[p-1][0]), ".")
             fig.savefig(self.path("cmel-%s.png" % label))
 
         self.cmel.absErr = 10**(-50)
@@ -127,7 +127,7 @@ class Test(BasicTest):
         evalPrec(0)
         for p in range(1,prec+1):
             evalPrec(p)
-            ax.plot(sp.full_like(answ[p][0], p), sp.absolute(answ[p][0] - answ[p-1][0]), ".")
+            ax.plot(p, sp.linalg.norm(answ[p][0] - answ[p-1][0]), ".")
             fig.savefig(self.path("crsc-%s.png" % label))
 
         
@@ -167,7 +167,7 @@ class Test(BasicTest):
         evalPrec(0)
         for p in range(1,prec+1):
             evalPrec(p)
-            ax.plot(sp.full_like(answ[p][0], p), sp.absolute(answ[p][0] - answ[p-1][0]), ".")
+            ax.plot(p, sp.linalg.norm(answ[p][0] - answ[p-1][0]), ".")
             fig.savefig(self.path("dmel-%s.png" % label))
 
         self.dmel.absErr = 10**(-50)
