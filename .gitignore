@@ -3,6 +3,7 @@ __pycache__
 *.pyo
 
 /doc/doxygen
+/doc/sphinx/build
 
 /tests/output
 /tests/configs/*
