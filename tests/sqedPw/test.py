@@ -1,4 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import\
+                      ,division\
+                      ,print_function\
+                      ,unicode_literals
 from builtins import *
 
 import os
@@ -34,48 +37,16 @@ class Test(BasicTest):
         self.config.register(self.SumruleEvaluatorInstance, "SUMRULE")
         self.config.register(self.SigmaEvaluatorInstance, "SIGMA")
 
-        self.points = 20
-        self.skipPointwise = False
-        self._keylist += ["points", "skipPointwise"]
-
         self.config.readEnv()
         self.config.readFile(self.configPath)
+        self.config.readEnv()
 
         if not os.path.exists(self.config["TEST_outputPath"]):
             os.makedirs(self.config["TEST_outputPath"])
 
-    def pointwiseSigma(self, mp, points):
-        "Test sigma value per point"
-
-        m = self.config["G_m"]
-        dimfactor = self.config["G_dimfactor"]
-        outputPath = self.config["TEST_outputPath"]
-
-        self.SigmaEvaluatorInstance.MPEvaluatorInstance = evals.TrivialEvaluator(mp)
-
-        label = mp.__name__
-
-        with t_utils.timing() as t:
-            res = list(map(lambda s: (s, self.SigmaEvaluatorInstance.compute(s)), points))
-            with open(self.path("meta"), "a") as f:
-                self.iwrite(f, "%s::sigma_evaltime(%d) %f" % (label, len(points), t()))
-
-        with open(self.path("sigma"), "a") as f:
-            self.iwrite(f, "# %s" % label)
-            self.iwrite(f, "s, sigma")
-            for pair in res:
-                self.iwrite(f, "%e, %e" % pair)
-
-        plt.plot(*list(zip(*res)))
-        plt.savefig(os.path.join(outputPath, "sigma_plot."+label+".png"))
-
     def dosum(self, mp):
         "evaluate sumrule for specific MP"
-        m = self.config["G_m"]
-        dimfactor = self.config["G_dimfactor"]
-        outputPath = self.config["TEST_outputPath"]
         label = mp.__name__
-
 
         mpEvaluator = evals.TrivialEvaluator(mp)
         mpEvaluator.monitor = Monitor(self.path("monitor_%s" % label))
@@ -96,23 +67,12 @@ class Test(BasicTest):
     def run(self):
         super(self.__class__, self).run()
 
-        minS = self.config["SUMRULE_minS"]
-        maxS = self.config["SUMRULE_maxS"]
-        points = self.config["TEST_points"]
-        outputPath = self.config["TEST_outputPath"]
-
-
-        if not self.skipPointwise:
-            thepoints = [minS + (maxS - minS)/points*i for i in range(points)]
-
-            self.pointwiseSigma(alyt.sqedMP0, thepoints)
-            self.pointwiseSigma(alyt.sqedMP2, thepoints)
-
         s0 = self.dosum(alyt.sqedMP0)
         s2 = self.dosum(alyt.sqedMP2)
 
         with open(self.path("sumrule"), "a") as f:
-            self.iwrite(f, "s0/s2-1 %f" % (s0/s2 - 1))
+            self.iwrite(f, "tot::sumrule %f" % (s0 - s2))
+
 
 
 if __name__ == "__main__":

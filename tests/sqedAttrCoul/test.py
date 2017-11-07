@@ -1,4 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import
+                      ,division
+                      ,print_function
+                      ,unicode_literals
 from builtins import *
 
 import os
@@ -123,10 +126,9 @@ class Test(BasicTest):
                 self.iwrite(f, "tot::cont::sumrule %f" % (s0 - s2))
 
         if "nodisc" not in self.flags:
-            ds0 = self.doDiscSum(alyt.sqedMP0\
-                               , lambda n,l,p,T,F: alyt.psiColPdisc(n, l, 0, p, T, F))
-            ds2 = self.doDiscSum(alyt.sqedMP2\
-                               , lambda n,l,p,T,F: alyt.psiColPdisc(n, l, 2, p, T, F))
+            ds0 = self.doDiscSum(alyt.sqedMP0, alyt.psiColPdisc0)
+            ds2 = self.doDiscSum(alyt.sqedMP2, alyt.psiColPdisc2)
+
             with open(self.path("sumrule"), "a") as f:
                 self.iwrite(f, "tot::disc::sumrule %f" % (ds0 - ds2))
 

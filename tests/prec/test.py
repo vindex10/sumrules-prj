@@ -1,4 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import\
+                      ,division\
+                      ,print_function\
+                      ,unicode_literals
 from builtins import *
 
 import os
@@ -32,7 +35,9 @@ class Test(BasicTest):
         self.crsc.relErr = 10**(-50)
 
         # Discrete spectrum evaluators
-        self.dmel = evals.McolPDiscEvaluator(None, None, alyt.energColDisc)
+        self.dmel = evals.McolPDiscEvaluator(None\
+                                            ,None\
+                                            ,alyt.energColDisc)
         self.dmel.vectorized = True
         self.dmel.mapper = parallel.npMap
         self.dmel.absErr = 10**(-50)
