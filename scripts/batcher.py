@@ -58,7 +58,7 @@ def sumruleDitor(data, spec, cfg):
         if "TEST_title" not in out.keys():
                 out.update({"TEST_title": cfg["suffix"]})
         
-        out.update({"TECH_numThreads": np.sum((p[1]*p[2] for p in spec))
+        out.update({"TECH_numThreads": sum((p[1]*p[2] for p in spec))
                    ,"TEST_outputPath": os.path.join(cfg["outputDir"]\
                                                   , cfg["suffix"]\
                                                   , "output"\
