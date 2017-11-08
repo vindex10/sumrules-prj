@@ -20,7 +20,7 @@ $(addprefix fast_,$(MODELS)):
 	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst fast_,,$@) python $(subst fast_,,$@)/test.py -c configs/fast.conf $(ARGS)
 
 $(addprefix batch_,$(MODELS)):
-	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py run $(subst batch_,,$@) $(ARGS) -o $(OUTPUT) -p $(PPATH) -s $(subst batch_,,$@)
+	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py run $(subst batch_,,$@) $(ARGS) -o $(OUTPUT)/$(subst batch_,,$@) -p $(PPATH)
 
 $(addprefix reduce_,$(MODELS)):
 	PYTHONPATH=$(PPATH) python $(PPATH)/scripts/batcher.py reduce $(OUTPUT)/$(subst reduce_,,$@)/output -o $(OUTPUT)/$(subst reduce_,,$@)/reduced
