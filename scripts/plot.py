@@ -11,6 +11,8 @@ CLI Args:
     * x: column corresponding to x axis.
     * y: column corresponding to y axis.
     * -d, --dir: path to dir where to start looking for file.
+    * -e, --export: whether to export merged data.
+    * -i, --integrate: whether to integrate.
 
 Returns:
     Plot with name `fname.png` stored at `path`.
@@ -62,6 +64,10 @@ def gather(path, fname, x, y):
             data = np.empty(shape=(0, 2))
     return data
 
+def clean_data(data):
+    """ Sort and remove duplicates. """
+    return np.unique(data[data[:,0].argsort()], axis=0)
+
 def parse_args(args):
     """ Parse cli arguments.
         
@@ -74,61 +80,92 @@ def parse_args(args):
             * x: column corresponding to x axis.
             * y: column corresponding to y axis.
             * -d, --dir: path to dir where to start looking for file.
+            * -e, --export: whether to export merged data.
+            * -i, --integrate: whether to integrate.
 
         Returns:
-            Tuple. (searchdir, fname, x, y).
+            Dict:
+
+                {"searchdir": str
+                ,"fname": str
+                ,"x": int
+                ,"y": int
+                ,"export": bool
+                ,"integrate": bool}
     """
     searchdir = "."
     x = 0
     y = 1
+    integrate = False
+    export = False
 
-    opts, parsed_args = getopt.gnu_getopt(args, "d:", ["dir="])
+    opts, parsed_args = getopt.gnu_getopt(args, "d:ei", ["dir="
+                                                        ,"export"
+                                                        ,"integrate"])
     for o, a in opts:
         if o in ("-d", "--dir"):
             searchdir = a
+        if o in ("-e", "--export"):
+            export = True
+        if o in ("-i", "--integrate"):
+            integrate = True
 
     fname = parsed_args[0]
 
-    if len(args) == 3:
+    if len(parsed_args) == 3:
         x = int(parsed_args[1])
         y = int(parsed_args[2])
 
     fname = os.path.basename(os.path.normpath(fname))
 
-    return searchdir, fname, x, y
+    return {"searchdir": searchdir
+           ,"fname": fname
+           ,"x": x
+           ,"y": y
+           ,"export": export
+           ,"integrate": integrate}
 
-def integr(data):
+def integr(rawdata):
     """ Estimate integral by given data.
         
         Use CubicSpline to interpolate `data`, then use quadrature for
         integration.
 
         Args:
-            data: NumPy array of (x, y) pairs.
+            rawdata: NumPy array of (x, y) pairs.
 
         Returns:
             NumPy array. (Integral, Error) pair.
     """
-    cleaned = np.unique(data[data[:,0].argsort()], axis=0)
-    inter = sp.interpolate.CubicSpline(cleaned[:, 0], cleaned[:, 1])
-    return sp.integrate.quad(inter, cleaned[0, 0], cleaned[-1,0])
+    data = clean_data(rawdata)
+    inter = sp.interpolate.CubicSpline(data[:, 0], data[:, 1])
+    return sp.integrate.quad(inter, data[0, 0], data[-1,0])
 
-def plot(data, fname):
+def plot(data, fname, integrate=False):
     """ Plot `data` and save to cwd.
         
         Args:
             data: NumPy array of (x,y) pairs.
             fname: Name of output file.
 
+        KWargs:
+            integrate: set to True if you want to compute
+                integral by the data.
+
         Returns:
             Nothing.
     """
     plt.plot(*data.T, ".")
-    int_est = integr(data)
-    plt.figtext(.02, .02, "Integral: %s" % str(int_est))
+    if integrate:
+        int_est = integr(data)
+        plt.figtext(.02, .02, "Integral: %s" % str(int_est))
     plt.savefig("%s.png" % fname)
 
 if __name__ == "__main__":
-    parsed_args = parse_args(sys.argv[1:])
-    data = gather(*parsed_args)
-    plot(data, parsed_args[1])
+    pa = parse_args(sys.argv[1:])
+    data = gather(pa["searchdir"], pa["fname"], pa["x"], pa["y"])
+    data = clean_data(data)
+    plot(data, pa["fname"], integrate=pa["integrate"])
+    if pa["export"]:
+        sp.savetxt("%s.dat" % pa["fname"], data)
+
