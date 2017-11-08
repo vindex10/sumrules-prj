@@ -30,6 +30,9 @@ def sumruleDitor(data, spec, cfg):
         Breaks `data` into a group of configs according to `spec`,
         taking into account Batch config `cfg`.
 
+        In case, if `CSUMRULE_maxS` is not specified, yield configs
+        with `outputPath`, `numThreads` and `title` substituted.
+
         Args:
             data: dict of config file entries.
             spec: list of tuples. A rule according to which configs
@@ -49,6 +52,20 @@ def sumruleDitor(data, spec, cfg):
         Yields:
             A config file.
     """
+    if "CSUMRULE_maxS" not in data.keys():
+        out = data.copy()
+
+        if "TEST_title" not in out.keys():
+                out.update({"TEST_title": cfg["suffix"]})
+        
+        out.update({"TECH_numThreads": np.sum((p[1]*p[2] for p in spec))
+                   ,"TEST_outputPath": os.path.join(cfg["outputDir"]\
+                                                  , cfg["suffix"]\
+                                                  , "output"\
+                                                  , out["TEST_title"])})
+        yield out
+        return
+
     assert "CSUMRULE_minS" in data.keys()\
             or\
             "G_m" in data.keys()
@@ -63,6 +80,7 @@ def sumruleDitor(data, spec, cfg):
         
 
     num = cfg["shift"]
+
     for part in spec:
         step = width/tot*part[0]/part[1]
         
