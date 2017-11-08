@@ -13,6 +13,11 @@ CLI Args:
     * -d, --dir: path to dir where to start looking for file.
     * -e, --export: whether to export merged data.
     * -i, --integrate: whether to integrate.
+    * -l, --logscale:
+        - -1: no logscale (default).
+        - 0: logscale for x.
+        - 1: logscale for y.
+        - 2: logscale for xy.
 
 Returns:
     Plot with name `fname.png` stored at `path`.
@@ -82,6 +87,11 @@ def parse_args(args):
             * -d, --dir: path to dir where to start looking for file.
             * -e, --export: whether to export merged data.
             * -i, --integrate: whether to integrate.
+            * -l, --logscale:
+                - -1: no logscale (default).
+                - 0: logscale for x.
+                - 1: logscale for y.
+                - 2: logscale for xy.
 
         Returns:
             Dict:
@@ -98,17 +108,21 @@ def parse_args(args):
     y = 1
     integrate = False
     export = False
+    logscale=-1
 
-    opts, parsed_args = getopt.gnu_getopt(args, "d:ei", ["dir="
+    opts, parsed_args = getopt.gnu_getopt(args, "d:eil:", ["dir="
                                                         ,"export"
-                                                        ,"integrate"])
+                                                        ,"integrate"
+                                                        ,"log="])
     for o, a in opts:
         if o in ("-d", "--dir"):
             searchdir = a
-        if o in ("-e", "--export"):
+        elif o in ("-e", "--export"):
             export = True
-        if o in ("-i", "--integrate"):
+        elif o in ("-i", "--integrate"):
             integrate = True
+        elif o in ("-l", "--log"):
+            logscale = int(str(a).strip())
 
     fname = parsed_args[0]
 
@@ -123,7 +137,8 @@ def parse_args(args):
            ,"x": x
            ,"y": y
            ,"export": export
-           ,"integrate": integrate}
+           ,"integrate": integrate
+           ,"logscale": logscale}
 
 def integr(rawdata):
     """ Estimate integral by given data.
@@ -141,7 +156,7 @@ def integr(rawdata):
     inter = sp.interpolate.CubicSpline(data[:, 0], data[:, 1])
     return sp.integrate.quad(inter, data[0, 0], data[-1,0])
 
-def plot(data, fname, integrate=False):
+def plot(data, fname, integrate=False, logscale=-1):
     """ Plot `data` and save to cwd.
         
         Args:
@@ -151,21 +166,38 @@ def plot(data, fname, integrate=False):
         KWargs:
             integrate: set to True if you want to compute
                 integral by the data.
+            logscale: whether to take a log of axes.
+                * -1: no logscale (default).
+                *  0: logscale for x.
+                *  1: logscale for y.
+                *  2: logscale for xy.
 
         Returns:
             Nothing.
     """
-    plt.plot(*data.T, ".")
+    data = sp.copy(data)
     if integrate:
         int_est = integr(data)
+        print("Integral (%s): %s" % (fname, int_est))
+
+    if logscale in (0, 2):
+        data[:, 0] = np.log(data[:, 0])
+    if logscale in (1, 2):
+        data[:, 1] = np.log(data[:, 1])
+
+    plt.plot(*data.T, ".")
+    if integrate:
         plt.figtext(.02, .02, "Integral: %s" % str(int_est))
+
     plt.savefig("%s.png" % fname)
 
 if __name__ == "__main__":
     pa = parse_args(sys.argv[1:])
     data = gather(pa["searchdir"], pa["fname"], pa["x"], pa["y"])
     data = clean_data(data)
-    plot(data, pa["fname"], integrate=pa["integrate"])
+    plot(data, pa["fname"]\
+        ,integrate=pa["integrate"]\
+        ,logscale=pa["logscale"])
     if pa["export"]:
         sp.savetxt("%s.dat" % pa["fname"], data)
 
