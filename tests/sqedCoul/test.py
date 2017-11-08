@@ -21,6 +21,8 @@ class Test(BasicTest):
     def __init__(self):
         super(self.__class__, self).__init__("sqedCoul")
 
+        self.flags = []
+        self._keylist.append("flags")
 
         # Continuous spectrum evaluators
         self.McolPEvaluatorInstance\
@@ -37,42 +39,41 @@ class Test(BasicTest):
         self.SumruleEvaluatorInstance.vectorized = True
         self.SumruleEvaluatorInstance.mapper = parallel.mpMap
 
-
-        # Discrete spectrum evaluators
-        self.McolPDiscEvaluatorInstance\
-                = evals.McolPDiscEvaluator(None, None, alyt.energColDisc)
-        self.McolPDiscEvaluatorInstance.vectorized = True
-        self.McolPDiscEvaluatorInstance.mapper = parallel.npMap
-
-        self.GammaEvaluatorInstance\
-                = evals.GammaDiscEvaluator(self.McolPDiscEvaluatorInstance)
-
-        self.SumruleDiscEvaluatorInstance\
-                = evals.SumruleDiscEvaluator(self.GammaEvaluatorInstance)
-
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
         self.config.register(self.SumruleEvaluatorInstance, "CSUMRULE")
         self.config.register(self.SigmaEvaluatorInstance, "CSIGMA")
         self.config.register(self.McolPEvaluatorInstance, "CMP")
-        self.config.register(self.SumruleDiscEvaluatorInstance, "DSUMRULE")
-        self.config.register(self.GammaEvaluatorInstance, "DGAMMA")
-        self.config.register(self.McolPDiscEvaluatorInstance, "DMP")
-
-        self.flags = []
-        self._keylist.append("flags")
 
         self.config.readEnv() # get config filename from env
         self.config.readFile(self.configPath)
         self.config.readEnv() # get other data from env, overwrite file
 
+        if self.config["G_g"] < 0:
+            # Discrete spectrum evaluators
+            self.McolPDiscEvaluatorInstance\
+                    = evals.McolPDiscEvaluator(None, None, alyt.energColDisc)
+            self.McolPDiscEvaluatorInstance.vectorized = True
+            self.McolPDiscEvaluatorInstance.mapper = parallel.npMap
+
+            self.GammaEvaluatorInstance\
+                    = evals.GammaDiscEvaluator(self.McolPDiscEvaluatorInstance)
+
+            self.SumruleDiscEvaluatorInstance\
+                    = evals.SumruleDiscEvaluator(self.GammaEvaluatorInstance)
+
+            self.config.register(self.SumruleDiscEvaluatorInstance, "DSUMRULE")
+            self.config.register(self.GammaEvaluatorInstance, "DGAMMA")
+            self.config.register(self.McolPDiscEvaluatorInstance, "DMP")
+
+            self.config.readEnv() # get config filename from env
+            self.config.readFile(self.configPath)
+            self.config.readEnv() # get other data from env, overwrite file
+
+
         if not os.path.exists(self.config["TEST_outputPath"]):
             os.makedirs(self.config["TEST_outputPath"])
 
-        if self.config["G_g"] > 0:
-            with open(self.path("params"), "a") as f: 
-                self.iwrite(f, "WARN! coupling was forced to become negative")
-            self.config["G_g"] *= -1
 
     def doContSum(self, mp):
         "evaluate sumrule for specific MP"
@@ -125,7 +126,8 @@ class Test(BasicTest):
             with open(self.path("sumrule"), "a") as f:
                 self.iwrite(f, "tot::cont::sumrule %f" % (s0 - s2))
 
-        if "nodisc" not in self.flags:
+        if "nodisc" not in self.flags\
+           and self.config["G_g"] < 0:
             ds0 = self.doDiscSum(alyt.sqedMP0, alyt.psiColPdisc0)
             ds2 = self.doDiscSum(alyt.sqedMP2, alyt.psiColPdisc2)
 
