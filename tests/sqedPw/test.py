@@ -34,8 +34,8 @@ class Test(BasicTest):
 
         self.config.register(sumrules.config, "TECH")
         self.config.register(sumrules.constants, "G")
-        self.config.register(self.SumruleEvaluatorInstance, "SUMRULE")
-        self.config.register(self.SigmaEvaluatorInstance, "SIGMA")
+        self.config.register(self.SumruleEvaluatorInstance, "CSUMRULE")
+        self.config.register(self.SigmaEvaluatorInstance, "CSIGMA")
 
         self.config.readEnv()
         self.config.readFile(self.configPath)
