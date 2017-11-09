@@ -1,4 +1,16 @@
 wd=$(dirname $(readlink -f "$BASH_SOURCE"))
 
+while test $# -gt 0; do
+    case "$1" in 
+        -)
+            export PYTHONPATH=$OLD_PYTHONPATH
+            deactivate
+            shift
+            return 0
+    esac
+done;
+
 . $wd/../activate
 export PATH=$wd:$PATH
+export OLD_PYTHONPATH=$PYTHONPATH
+export PYTHONPATH=$wd/..
