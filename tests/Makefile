@@ -14,7 +14,7 @@ $(addprefix clean_,$(MODELS)):
 	rm -rf $(OUTPUT)/$(subst clean_,,$@)
 
 $(MODELS):
-	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst clean_,,$@) python $@/test.py $(ARGS)
+	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$@/$(SUFFIX) python $@/test.py $(ARGS)
 
 $(addprefix fast_,$(MODELS)):
 	PYTHONPATH=$(PPATH) TEST_outputPath=$(OUTPUT)/$(subst fast_,,$@) python $(subst fast_,,$@)/test.py -c configs/fast.conf $(ARGS)
