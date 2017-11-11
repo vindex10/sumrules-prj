@@ -28,7 +28,7 @@ class Test(BasicTest):
         self.SigmaEvaluatorInstance.mapper = parallel.npMap
 
         self.SumruleEvaluatorInstance\
-                = evals.SumruleEvaluator(self.SigmaEvaluatorInstance)
+                = evals.SumruleLogEvaluator(self.SigmaEvaluatorInstance)
         self.SumruleEvaluatorInstance.vectorized = True
         self.SumruleEvaluatorInstance.mapper = parallel.mpMap
 

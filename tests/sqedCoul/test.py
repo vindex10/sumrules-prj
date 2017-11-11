@@ -35,7 +35,7 @@ class Test(BasicTest):
         self.SigmaEvaluatorInstance.cyclics.update({1: 0})
 
         self.SumruleEvaluatorInstance\
-                = evals.SumruleEvaluator(self.SigmaEvaluatorInstance)
+                = evals.SumruleLogEvaluator(self.SigmaEvaluatorInstance)
         self.SumruleEvaluatorInstance.vectorized = True
         self.SumruleEvaluatorInstance.mapper = parallel.mpMap
 
