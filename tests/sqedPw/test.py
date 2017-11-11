@@ -49,11 +49,10 @@ class Test(BasicTest):
         label = mp.__name__
 
         mpEvaluator = evals.TrivialEvaluator(mp)
-        mpEvaluator.monitor = Monitor(self.path("monitor_%s" % label))
-
         self.SigmaEvaluatorInstance.MPEvaluatorInstance = mpEvaluator
-        self.SigmaEvaluatorInstance.monitor =\
-                Monitor(self.path("monitor_sigma-%s" % label))
+
+        self.SumruleEvaluatorInstance.monitor =\
+                Monitor(self.path("monitor_sr::%s.dat" % label))
 
         with t_utils.timing() as t:
             sr = self.SumruleEvaluatorInstance.compute()
