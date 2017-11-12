@@ -113,11 +113,12 @@ def sumruleDitor(data, spec, cfg):
             yield out
 
 def qsubTestCall(prjPath\
-               , testname\
-               , jobName\
-               , cfgPath\
-               , numThreads\
-               , logPath):
+                ,testname\
+                ,jobName\
+                ,cfgPath\
+                ,numThreads\
+                ,logPath
+                ,dry=False):
     """ Call qsub with corresponding args.
         
         Args:
@@ -127,6 +128,9 @@ def qsubTestCall(prjPath\
             cfgPath: path to config file for test.
             numThreads: number of threads to allocate for job.
             logPath: path to log file, for qsub output.
+
+        KWargs:
+            dry: if True, then no calling. Only show commands.
 
         Returns:
             Nothig.
@@ -147,7 +151,8 @@ def qsubTestCall(prjPath\
              , jobName)
 
     print(qsub)
-    subprocess.call(qsub, shell=True)
+    if not dry:
+        subprocess.call(qsub, shell=True)
 
 def srReduce(path):
     """ Compute total for each field stored in `sumrule` output file.

@@ -17,8 +17,9 @@ class Batch(object):
                 * testName - name of the test to be run.
                 * tplPath - path to config to be parallelized.
                 * suffix - name of subdir to distinguish different runs.
-                * shift - start enumeration of jobs not from 0, but from `shift`
-                * logscale - whether to distribute in log scale
+                * shift - start enumeration of jobs not from 0, but from `shift`.
+                * logscale - whether to distribute in log scale.
+                * dry - if True, then only generate configs, no calling.
             ditor: function which will break config into parts, 1 per job.
             call: a function which will call `qsub` or `slurm` to start the job.
     """
@@ -127,7 +128,8 @@ class Batch(object):
                      ,cfg["TEST_title"]\
                      ,self.path("configs", "%s.conf" % cfg["TEST_title"])
                      ,cfg["TECH_numThreads"]
-                     ,self.path("logs", "%s.log" % cfg["TEST_title"]))
+                     ,self.path("logs", "%s.log" % cfg["TEST_title"])
+                     ,dry=self.config["dry"])
 
     def run(self, spec):
         """ Run batch.
@@ -139,6 +141,5 @@ class Batch(object):
             self.readFile(f)
         self.envInit()
         cfgs = self.writeConfigs(spec)
-        if not self.config["dry"]:
-            self.doCalls(cfgs)
+        self.doCalls(cfgs)
 
