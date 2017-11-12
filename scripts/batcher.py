@@ -8,6 +8,7 @@ CLI Args for `batch`:
     * -p, -ppath: path to sumrule-prj root.
     * -s, --suffix: name to distinguish different runs of the same test.
     * -t, --shift: set shift to start numbering not from 0.
+    * -l, --logscale: break interval in for logarithmic scale.
 
 CLI Args for `reduce`:
     * -o, --output: path to where `reduce` should store its output,
@@ -20,6 +21,7 @@ import getopt
 import os
 import subprocess
 import sys
+import math
 
 import numpy as np
 from tools.Batch import Batch
@@ -47,6 +49,9 @@ def sumruleDitor(data, spec, cfg):
                 For each of these 4 parts will be allocated 2 processors.
                 The second part will be broken in 6 equal parts by `s`, and
                 for each of these 6 parts will be allocated 1 processor.
+
+                Note: if `logscale` is specified in `cfg`, then range will
+                be broken evenly according to log ruler.
             cfg: stores key-value pairs of Batch configuration.
 
         Yields:
@@ -72,17 +77,20 @@ def sumruleDitor(data, spec, cfg):
 
     tot = sum(spec.T[0])
     try:
-        width = data["CSUMRULE_maxS"]-data["CSUMRULE_minS"]
         pos = data["CSUMRULE_minS"]
     except KeyError:
         pos = 4*data["G_m"]**2 + 0.001
-        width = data["CSUMRULE_maxS"]-pos
-        
+    minS = pos
 
     num = cfg["shift"]
 
     for part in spec:
-        step = width/tot*part[0]/part[1]
+        if cfg["logscale"]:
+            step = (math.exp(math.log(\
+                    data["CSUMRULE_maxS"]/minS\
+                )/tot*part[0]/part[1]) - 1)*pos
+        else:
+            step =(data["CSUMRULE_maxS"]-minS)/tot*part[0]/part[1]
         
         for i in range(part[1]):
             out = data.copy()
@@ -184,10 +192,12 @@ def batchRun(args):
     inst.config["testName"] = args[0]
     inst.config["tplPath"] = args[1]
 
-    opts, rem = getopt.gnu_getopt(args, "o:p:s:t:",("odir="\
+    opts, rem = getopt.gnu_getopt(args, "o:p:s:t:ld",("odir="\
                                            ,"ppath="\
                                            ,"suffix="
-                                           ,"shift="))
+                                           ,"shift="
+                                           ,"logscale"
+                                           ,"dryrun"))
     for opt, arg in opts:
         if opt in ("-o", "--odir"):
             inst.config["outputDir"] = arg
@@ -195,6 +205,10 @@ def batchRun(args):
             inst.config["prjPath"] = arg
         elif opt in ("-s", "--suffix"):
             inst.config["suffix"] = arg
+        elif opt in ("-l", "--logscale"):
+            inst.config["logscale"] = True
+        elif opt in ("-d", "--dryrun"):
+            inst.config["dry"] = True
         elif opt in ("-t", "--shift"):
             try:
                 inst.config["shift"] = int(arg)
