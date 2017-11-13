@@ -127,9 +127,9 @@ class Batch(object):
                      ,self.config["testName"]\
                      ,cfg["TEST_title"]\
                      ,self.path("configs", "%s.conf" % cfg["TEST_title"])
-                     ,cfg["TECH_numThreads"]
-                     ,self.path("logs", "%s.log" % cfg["TEST_title"])
                      ,dry=self.config["dry"])
+                     ,cfg["BATCH_ppn"]
+                     ,self.path("logs", "%s.log" % cfg["TEST_title"]))
 
     def run(self, spec):
         """ Run batch.
