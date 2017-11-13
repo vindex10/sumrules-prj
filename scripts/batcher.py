@@ -85,14 +85,14 @@ def sumruleDitor(data, spec, cfg):
     num = cfg["shift"]
 
     for part in spec:
-        if cfg["logscale"]:
-            step = (math.exp(math.log(\
-                    data["CSUMRULE_maxS"]/minS\
-                )/tot*part[0]/part[1]) - 1)*pos
-        else:
-            step =(data["CSUMRULE_maxS"]-minS)/tot*part[0]/part[1]
-        
         for i in range(part[1]):
+            if cfg["logscale"]:
+                step = (math.exp(math.log(\
+                        data["CSUMRULE_maxS"]/minS\
+                    )/tot*part[0]/part[1]) - 1)*pos
+            else:
+                step =(data["CSUMRULE_maxS"]-minS)/tot*part[0]/part[1]
+
             out = data.copy()
 
             if "TEST_title" not in out.keys():
@@ -103,6 +103,7 @@ def sumruleDitor(data, spec, cfg):
             out["CSUMRULE_maxS"] = pos + step
 
             out.update({"TECH_numThreads": part[2]
+                       ,"BATCH_ppn": part[1]
                        ,"TEST_outputPath": os.path.join(cfg["outputDir"]\
                                                       , cfg["suffix"]\
                                                       , "output"\
