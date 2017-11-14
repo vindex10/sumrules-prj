@@ -102,8 +102,8 @@ def sumruleDitor(data, spec, cfg):
             out["CSUMRULE_minS"] = pos
             out["CSUMRULE_maxS"] = pos + step
 
-            out.update({"TECH_numThreads": part[2]
-                       ,"BATCH_ppn": part[1]
+            out.update({"TECH_numThreads": part[3]
+                       ,"BATCH_ppn": part[2]
                        ,"TEST_outputPath": os.path.join(cfg["outputDir"]\
                                                       , cfg["suffix"]\
                                                       , "output"\
