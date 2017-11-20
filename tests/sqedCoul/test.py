@@ -11,6 +11,7 @@ import tools.utils as t_utils
 
 import sumrules
 import sumrules.lib.analytics as alyt
+import sumrules.lib.legacy_analytics as legalyt
 import sumrules.lib.evaluators as evals
 
 from sumrules.utils import parallel
@@ -128,8 +129,8 @@ class Test(BasicTest):
 
         if "nodisc" not in self.flags\
            and self.config["G_g"] < 0:
-            ds0 = self.doDiscSum(alyt.sqedMP0, alyt.psiColPdisc0)
-            ds2 = self.doDiscSum(alyt.sqedMP2, alyt.psiColPdisc2)
+            ds0 = self.doDiscSum(alyt.sqedMP0, legalyt.psiColPdisc0)
+            ds2 = self.doDiscSum(alyt.sqedMP2, legalyt.psiColPdisc2)
 
             with open(self.path("sumrule"), "a") as f:
                 self.iwrite(f, "tot::disc::sumrule %f" % (ds0 - ds2))
