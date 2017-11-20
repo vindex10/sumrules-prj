@@ -38,7 +38,7 @@ class Batch(object):
                              ,"tplPath": "template.cfg"
                              ,"suffix": datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                              ,"shift": 0
-                             ,"logscale": True
+                             ,"logscale": False
                              ,"dry": False
                         })
         self.ditor = ditor
